@@ -1,0 +1,27 @@
+[
+  {
+    "host": "localhost",
+    "port": 3306,
+    "databaseName": "Berisheba",
+    "user": "root",
+    "password": "toor11",
+    "databaseType": "mysql",
+    "schemaName": "",
+    "ssl": false
+  },
+  {
+    "resultsPath": "/home/snowden/Project/Stage/Web Services/src",
+    "noConfigs": false,
+    "convertCaseFile": "none",
+    "convertCaseEntity": "none",
+    "convertCaseProperty": "none",
+    "propertyVisibility": "public",
+    "lazy": false,
+    "activeRecord": false,
+    "generateConstructor": false,
+    "customNamingStrategyPath": "",
+    "relationIds": false,
+    "strictMode": "!",
+    "skipSchema": false
+  }
+]

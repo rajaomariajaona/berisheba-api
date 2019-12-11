@@ -1,0 +1,14 @@
+[
+  {
+    "name": "default",
+    "type": "sqlite",
+    "database": "./db/berisheba.db",
+    "synchronize": false,
+    "entities": [
+      "build/entities/*.js"
+   ],
+   "cli": {
+      "entitiesDir": "src/entities"
+   }
+  }
+]
