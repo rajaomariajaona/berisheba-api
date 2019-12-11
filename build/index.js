@@ -12,7 +12,7 @@ typeorm_1.createConnection().then(function (connection) {
 });
 var app = express_1.default();
 app.get('/', function (req, res) {
-    res.json({ message: "ok" });
+    res.json({ message: "De aona ry Cyri e? ;p " });
 });
 app.listen(process.env.PORT || 3000);
 //# sourceMappingURL=index.js.map

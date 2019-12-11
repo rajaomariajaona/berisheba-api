@@ -11,6 +11,6 @@ createConnection().then(connection => {
 
 const app = express();
 app.get('/', (req: Request, res: Response) => {
-    res.json({message: "ok"})
+    res.json({message: "De aona ry Cyri e? ;p "})
 })
 app.listen(process.env.PORT || 3000)
