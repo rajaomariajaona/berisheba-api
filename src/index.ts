@@ -1,20 +1,18 @@
 import 'reflect-metadata';
 import {createConnection} from 'typeorm'
-import { Client } from './entities/Client';
-import { Utiliser } from './entities/Utiliser';
-
 import express, {  Request, Response } from "express"
-
+import { Client } from './entities/Client';
+const app = express();
 createConnection().then(connection => {
-    connection.manager.save(new Client());
-    app.get('/', (req: Request, res: Response) => {
-        
-        connection.getRepository(Client).find().then((clients: Client[]) => {
+    app.get("/", (req, res) => {
+        var repos = connection.getRepository(Client)
+        repos.save(new Client())
+        repos.find().then((clients: Client[]) => {
             res.json({data : clients})
         })
+        
     })
+    console.log("OK")
+}).then(() => {
+    app.listen(process.env.PORT || 3000)
 })
-
-const app = express();
-
-app.listen(process.env.PORT || 3000)
