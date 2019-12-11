@@ -6,11 +6,13 @@ import { Utiliser } from './entities/Utiliser';
 import express, {  Request, Response } from "express"
 
 createConnection().then(connection => {
-    console.log(connection.getRepository(Client))
+    app.get('/', (req: Request, res: Response) => {
+        connection.getRepository(Client).find().then((clients: Client[]) => {
+            res.json({data : clients})
+        })
+    })
 })
 
 const app = express();
-app.get('/', (req: Request, res: Response) => {
-    res.json({message: "De aona ry Cyri e? ;p "})
-})
+
 app.listen(process.env.PORT || 3000)
