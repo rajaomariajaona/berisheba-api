@@ -8,6 +8,7 @@ var typeorm_1 = require("typeorm");
 var Client_1 = require("./entities/Client");
 var express_1 = __importDefault(require("express"));
 typeorm_1.createConnection().then(function (connection) {
+    connection.manager.save(new Client_1.Client());
     app.get('/', function (req, res) {
         connection.getRepository(Client_1.Client).find().then(function (clients) {
             res.json({ data: clients });
