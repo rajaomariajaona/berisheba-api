@@ -14,5 +14,5 @@ var app = express_1.default();
 app.get('/', function (req, res) {
     res.json({ message: "ok" });
 });
-app.listen(3000);
+app.listen(process.env.PORT || 3000);
 //# sourceMappingURL=index.js.map
