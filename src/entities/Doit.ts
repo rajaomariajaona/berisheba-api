@@ -19,9 +19,8 @@ export class Doit {
     reservationIdReservation:Reservation | null;
 
 
-    @Column("double",{ 
+    @Column("double precision",{ 
         nullable:true,
-        precision:22,
         name:"prixAutre"
         })
     prixAutre:number | null;

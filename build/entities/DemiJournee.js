@@ -16,17 +16,19 @@ var DemiJournee = /** @class */ (function () {
     }
     __decorate([
         typeorm_1.Column("date", {
-            nullable: false,
             primary: true,
-            name: "date"
+            nullable: false,
+            name: "date",
+            unique: true
         }),
-        __metadata("design:type", String)
+        __metadata("design:type", Function)
     ], DemiJournee.prototype, "date", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: false,
             primary: true,
+            nullable: false,
             length: 20,
+            unique: true,
             name: "TypeDemiJournee"
         }),
         __metadata("design:type", String)
@@ -40,7 +42,8 @@ var DemiJournee = /** @class */ (function () {
         __metadata("design:type", Array)
     ], DemiJournee.prototype, "constituers2", void 0);
     DemiJournee = __decorate([
-        typeorm_1.Entity("DemiJournee", { schema: "Berisheba" })
+        typeorm_1.Entity("DemiJournee", { schema: "Berisheba" }),
+        typeorm_1.Index("lol", ["TypeDemiJournee", "date",], { unique: true })
     ], DemiJournee);
     return DemiJournee;
 }());

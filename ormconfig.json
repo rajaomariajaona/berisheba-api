@@ -1,12 +1,12 @@
 [
   {
-    "type": "mysql",
-   "host": "remotemysql.com",
-   "port": 3306,
-   "username": "nUaZCY8bXf",
-   "password": "iHTG9HbCfy",
-   "database": "nUaZCY8bXf",
-    "synchronize": false,
+    "type": "postgres",
+   "host": "localhost",
+   "port": 5432,
+   "username": "postgres",
+   "password": "toor11",
+   "database": "berisheba",
+    "synchronize": true,
     "entities": [
       "build/entities/*.js"
    ],

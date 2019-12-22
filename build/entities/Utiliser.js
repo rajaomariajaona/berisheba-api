@@ -34,9 +34,8 @@ var Utiliser = /** @class */ (function () {
         __metadata("design:type", String)
     ], Utiliser.prototype, "nomAppareil", void 0);
     __decorate([
-        typeorm_1.Column("double", {
+        typeorm_1.Column("double precision", {
             nullable: true,
-            precision: 22,
             name: "puissance"
         }),
         __metadata("design:type", Number)

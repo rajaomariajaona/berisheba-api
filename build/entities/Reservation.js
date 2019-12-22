@@ -31,24 +31,22 @@ var Reservation = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Reservation.prototype, "idReservation", void 0);
     __decorate([
-        typeorm_1.Column("double", {
+        typeorm_1.Column("double precision", {
             nullable: true,
-            precision: 22,
             name: "prixPersonne"
         }),
         __metadata("design:type", Number)
     ], Reservation.prototype, "prixPersonne", void 0);
     __decorate([
-        typeorm_1.Column("double", {
+        typeorm_1.Column("double precision", {
             nullable: true,
-            precision: 22,
             name: "prixKW"
         }),
         __metadata("design:type", Number)
     ], Reservation.prototype, "prixKW", void 0);
     __decorate([
-        typeorm_1.Column("tinyint", {
-            nullable: true,
+        typeorm_1.Column("boolean", {
+            nullable: false,
             name: "etatReservation"
         }),
         __metadata("design:type", Number)

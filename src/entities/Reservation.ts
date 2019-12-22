@@ -23,24 +23,22 @@ export class Reservation {
     idReservation:number;
         
 
-    @Column("double",{ 
+    @Column("double precision",{ 
         nullable:true,
-        precision:22,
         name:"prixPersonne"
         })
     prixPersonne:number | null;
         
 
-    @Column("double",{ 
+    @Column("double precision",{ 
         nullable:true,
-        precision:22,
         name:"prixKW"
         })
     prixKW:number | null;
         
 
-    @Column("tinyint",{ 
-        nullable:true,
+    @Column("boolean",{ 
+        nullable:false,
         name:"etatReservation"
         })
     etatReservation:number | null;

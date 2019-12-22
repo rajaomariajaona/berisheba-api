@@ -29,13 +29,13 @@ var Constituer = /** @class */ (function () {
     ], Constituer.prototype, "nbPersonne", void 0);
     __decorate([
         typeorm_1.ManyToOne(function () { return DemiJournee_1.DemiJournee; }, function (DemiJournee) { return DemiJournee.constituers; }, { primary: true, nullable: false, onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
-        typeorm_1.JoinColumn({ name: 'DemiJournee_date' }),
-        __metadata("design:type", DemiJournee_1.DemiJournee)
+        typeorm_1.JoinColumn({ name: 'DemiJournee_date', referencedColumnName: "date" }),
+        __metadata("design:type", Function)
     ], Constituer.prototype, "demiJourneeDate", void 0);
     __decorate([
         typeorm_1.ManyToOne(function () { return DemiJournee_1.DemiJournee; }, function (DemiJournee) { return DemiJournee.constituers2; }, { primary: true, nullable: false, onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
-        typeorm_1.JoinColumn({ name: 'DemiJournee_TypeDemiJournee' }),
-        __metadata("design:type", DemiJournee_1.DemiJournee)
+        typeorm_1.JoinColumn({ name: 'DemiJournee_TypeDemiJournee', referencedColumnName: "TypeDemiJournee" }),
+        __metadata("design:type", String)
     ], Constituer.prototype, "demiJourneeTypeDemiJournee", void 0);
     Constituer = __decorate([
         typeorm_1.Entity("Constituer", { schema: "Berisheba" }),

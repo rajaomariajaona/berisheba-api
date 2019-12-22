@@ -3,20 +3,23 @@ import {Constituer} from "./Constituer";
 
 
 @Entity("DemiJournee" ,{schema:"Berisheba" } )
+@Index("lol",["TypeDemiJournee","date",],{unique:true})
 export class DemiJournee {
 
     @Column("date",{ 
+        primary: true,
         nullable:false,
-        primary:true,
-        name:"date"
+        name:"date",
+        unique: true
         })
-    date:string;
+    date:DateConstructor;
         
 
     @Column("varchar",{ 
+        primary: true,
         nullable:false,
-        primary:true,
         length:20,
+        unique: true,
         name:"TypeDemiJournee"
         })
     TypeDemiJournee:string;

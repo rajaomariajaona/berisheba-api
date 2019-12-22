@@ -26,9 +26,8 @@ var Doit = /** @class */ (function () {
         __metadata("design:type", Reservation_1.Reservation)
     ], Doit.prototype, "reservationIdReservation", void 0);
     __decorate([
-        typeorm_1.Column("double", {
+        typeorm_1.Column("double precision", {
             nullable: true,
-            precision: 22,
             name: "prixAutre"
         }),
         __metadata("design:type", Number)

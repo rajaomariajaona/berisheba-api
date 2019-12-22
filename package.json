@@ -21,6 +21,7 @@
       "mysql": "^2.14.1",
       "mysql2": "^2.0.1",
       "passport": "^0.4.0",
+      "pg": "^7.15.1",
       "reflect-metadata": "^0.1.10",
       "socket.io": "^2.3.0",
       "sqlite3": "^4.1.1",

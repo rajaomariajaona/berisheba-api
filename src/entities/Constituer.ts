@@ -22,13 +22,13 @@ export class Constituer {
 
    
     @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee.constituers,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION' })
-    @JoinColumn({ name:'DemiJournee_date'})
-    demiJourneeDate:DemiJournee | null;
+    @JoinColumn({ name:'DemiJournee_date', referencedColumnName: "date"})
+    demiJourneeDate:DateConstructor;
 
 
    
     @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee.constituers2,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION' })
-    @JoinColumn({ name:'DemiJournee_TypeDemiJournee'})
-    demiJourneeTypeDemiJournee:DemiJournee | null;
+    @JoinColumn({ name:'DemiJournee_TypeDemiJournee', referencedColumnName: "TypeDemiJournee"})
+    demiJourneeTypeDemiJournee:string;
 
 }

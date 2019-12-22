@@ -27,9 +27,8 @@ export class Utiliser {
     nomAppareil:string | null;
         
 
-    @Column("double",{ 
+    @Column("double precision",{ 
         nullable:true,
-        precision:22,
         name:"puissance"
         })
     puissance:number | null;
