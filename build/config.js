@@ -13,5 +13,13 @@ var connectionOption = {
         "build/entities/*.js"
     ],
 };
-exports.ormconfig = connectionOption;
+var connectionOptionHeroku = {
+    type: "postgres",
+    url: process.env.DATABASE_URL,
+    synchronize: true,
+    entities: [
+        "build/entities/*.js"
+    ],
+};
+exports.ormconfig = process.env.DATABASE_URL ? connectionOptionHeroku : connectionOption;
 //# sourceMappingURL=config.js.map

@@ -14,5 +14,14 @@ var connectionOption: ConnectionOptions = {
    ],
 }
 
+var connectionOptionHeroku: ConnectionOptions = {
+   type: "postgres",
+   url: process.env.DATABASE_URL,
+   synchronize: true,
+   entities: [
+      "build/entities/*.js"
+   ],
+}
 
-export const ormconfig = connectionOption;
+
+export const ormconfig = process.env.DATABASE_URL? connectionOptionHeroku : connectionOption;
