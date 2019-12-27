@@ -2,7 +2,7 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Reservation} from "./Reservation";
 
 
-@Entity("Materiels" ,{schema:"Berisheba" } )
+@Entity("Materiels" )
 export class Materiels {
 
     @PrimaryGeneratedColumn({

@@ -2,7 +2,7 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Reservation} from "./Reservation";
 
 
-@Entity("Client" ,{schema:"Berisheba" } )
+@Entity("Client" )
 export class Client {
 
     @PrimaryGeneratedColumn({
@@ -13,11 +13,17 @@ export class Client {
         
 
     @Column("varchar",{ 
-        nullable:true,
-        length:100,
+        nullable:false,
+        length:50,
         name:"nomClient"
         })
-    nomClient:string | null;
+    nomClient:string;
+    @Column("varchar",{ 
+        nullable:true,
+        length:50,
+        name:"prenomClient"
+        })
+    prenomClient:string | null;
         
 
     @Column("varchar",{ 

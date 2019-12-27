@@ -3,7 +3,7 @@ import {Reservation} from "./Reservation";
 import {DemiJournee} from "./DemiJournee";
 
 
-@Entity("Constituer" ,{schema:"Berisheba" } )
+@Entity("Constituer" )
 @Index("fk_Constituer_DemiJournee1",["demiJourneeDate","demiJourneeTypeDemiJournee",])
 export class Constituer {
 

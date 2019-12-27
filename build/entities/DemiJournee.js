@@ -42,7 +42,7 @@ var DemiJournee = /** @class */ (function () {
         __metadata("design:type", Array)
     ], DemiJournee.prototype, "constituers2", void 0);
     DemiJournee = __decorate([
-        typeorm_1.Entity("DemiJournee", { schema: "Berisheba" }),
+        typeorm_1.Entity("DemiJournee"),
         typeorm_1.Index("lol", ["TypeDemiJournee", "date",], { unique: true })
     ], DemiJournee);
     return DemiJournee;

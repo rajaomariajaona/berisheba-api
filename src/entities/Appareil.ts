@@ -2,7 +2,7 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Utiliser} from "./Utiliser";
 
 
-@Entity("Appareil" ,{schema:"Berisheba" } )
+@Entity("Appareil" )
 export class Appareil {
 
     @Column("varchar",{ 

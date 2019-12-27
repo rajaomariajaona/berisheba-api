@@ -42,7 +42,7 @@ var Doit = /** @class */ (function () {
         __metadata("design:type", String)
     ], Doit.prototype, "motif", void 0);
     Doit = __decorate([
-        typeorm_1.Entity("Doit", { schema: "Berisheba" }),
+        typeorm_1.Entity("Doit"),
         typeorm_1.Index("fk_Autre_has_Reservation_Reservation1", ["reservationIdReservation",])
     ], Doit);
     return Doit;

@@ -28,7 +28,7 @@ var Appareil = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Appareil.prototype, "utilisers", void 0);
     Appareil = __decorate([
-        typeorm_1.Entity("Appareil", { schema: "Berisheba" })
+        typeorm_1.Entity("Appareil")
     ], Appareil);
     return Appareil;
 }());

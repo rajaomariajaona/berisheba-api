@@ -1,14 +1,14 @@
 import { Router, Response, Request, NextFunction } from "express";
 import { createConnection } from "typeorm";
 import { Client } from '../../entities/Client';
-
+import {ormconfig} from "../../config";
 var clientRoute  = Router()
-createConnection().then((connection) => {
+createConnection(ormconfig).then((connection) => {
     var clientRepository = connection.getRepository(Client)
     clientRoute.get("/", (req, res, next) =>{
         clientRepository.find().then((clients: Client[]) =>{
             res.status(200).json({data : clients})
-            next()
+            next();
         })
     })
     clientRoute.get("/:id", (req, res, next) =>{
@@ -30,13 +30,22 @@ createConnection().then((connection) => {
         })
     })
     clientRoute.post("/",  (req, res, next) =>{
-        var c = clientRepository.create(req.body)
+        if(req.body.deleteList){
+            clientRepository.delete(JSON.parse(req.body.deleteList)).then(() => {
+                    res.status(201).json({message : "deleted successfully"})
+                }).catch((error) =>
+                    res.status(400).json({message : "Not found", error : error})
+            );
+        }else{
+            var c = clientRepository.create(req.body)
         clientRepository.save(c).then(client => {
             if(client)
                 res.status(201).json({message : "added successfully"})
             else
                 res.status(400).json({message : "Not found"})
         });
+        }
+    
     })
     clientRoute.put("/:id", async (req, res, next) =>{   
         var c = await clientRepository.findOne(req.params.id)   

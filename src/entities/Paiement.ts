@@ -2,7 +2,7 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Payer} from "./Payer";
 
 
-@Entity("Paiement" ,{schema:"Berisheba" } )
+@Entity("Paiement" )
 export class Paiement {
 
     @Column("varchar",{ 

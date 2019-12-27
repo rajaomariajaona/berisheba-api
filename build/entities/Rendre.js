@@ -40,7 +40,7 @@ var Rendre = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Rendre.prototype, "nbRendue", void 0);
     Rendre = __decorate([
-        typeorm_1.Entity("Rendre", { schema: "Berisheba" }),
+        typeorm_1.Entity("Rendre"),
         typeorm_1.Index("fk_Ustensile_has_Reservation1_Reservation1", ["reservationIdReservation",])
     ], Rendre);
     return Rendre;

@@ -3,7 +3,7 @@ import {Ustensile} from "./Ustensile";
 import {Reservation} from "./Reservation";
 
 
-@Entity("Rendre" ,{schema:"Berisheba" } )
+@Entity("Rendre" )
 @Index("fk_Ustensile_has_Reservation1_Reservation1",["reservationIdReservation",])
 export class Rendre {
 

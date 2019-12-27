@@ -40,7 +40,7 @@ var Emprunt = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Emprunt.prototype, "nbEmprunt", void 0);
     Emprunt = __decorate([
-        typeorm_1.Entity("Emprunt", { schema: "Berisheba" }),
+        typeorm_1.Entity("Emprunt"),
         typeorm_1.Index("fk_Ustensile_has_Reservation_Reservation1", ["reservationIdReservation",])
     ], Emprunt);
     return Emprunt;

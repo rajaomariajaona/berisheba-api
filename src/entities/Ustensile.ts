@@ -3,7 +3,7 @@ import {Rendre} from "./Rendre";
 import {Emprunt} from "./Emprunt";
 
 
-@Entity("Ustensile" ,{schema:"Berisheba" } )
+@Entity("Ustensile" )
 export class Ustensile {
 
     @PrimaryGeneratedColumn({

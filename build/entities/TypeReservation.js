@@ -28,7 +28,7 @@ var TypeReservation = /** @class */ (function () {
         __metadata("design:type", Array)
     ], TypeReservation.prototype, "reservations", void 0);
     TypeReservation = __decorate([
-        typeorm_1.Entity("TypeReservation", { schema: "Berisheba" })
+        typeorm_1.Entity("TypeReservation")
     ], TypeReservation);
     return TypeReservation;
 }());

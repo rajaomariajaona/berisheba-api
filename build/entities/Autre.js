@@ -28,7 +28,7 @@ var Autre = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Autre.prototype, "doits", void 0);
     Autre = __decorate([
-        typeorm_1.Entity("Autre", { schema: "Berisheba" })
+        typeorm_1.Entity("Autre")
     ], Autre);
     return Autre;
 }());

@@ -41,7 +41,7 @@ var Materiels = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Materiels.prototype, "reservations", void 0);
     Materiels = __decorate([
-        typeorm_1.Entity("Materiels", { schema: "Berisheba" })
+        typeorm_1.Entity("Materiels")
     ], Materiels);
     return Materiels;
 }());

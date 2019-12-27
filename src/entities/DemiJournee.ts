@@ -2,7 +2,7 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Constituer} from "./Constituer";
 
 
-@Entity("DemiJournee" ,{schema:"Berisheba" } )
+@Entity("DemiJournee" )
 @Index("lol",["TypeDemiJournee","date",],{unique:true})
 export class DemiJournee {
 

@@ -41,7 +41,7 @@ var Payer = /** @class */ (function () {
         __metadata("design:type", String)
     ], Payer.prototype, "sommePayee", void 0);
     Payer = __decorate([
-        typeorm_1.Entity("Payer", { schema: "Berisheba" }),
+        typeorm_1.Entity("Payer"),
         typeorm_1.Index("fk_Reservation_has_Paiement_Paiement1", ["paiementTypePaiement",])
     ], Payer);
     return Payer;

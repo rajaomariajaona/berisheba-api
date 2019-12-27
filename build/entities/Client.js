@@ -23,12 +23,20 @@ var Client = /** @class */ (function () {
     ], Client.prototype, "idClient", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
-            length: 100,
+            nullable: false,
+            length: 50,
             name: "nomClient"
         }),
         __metadata("design:type", String)
     ], Client.prototype, "nomClient", void 0);
+    __decorate([
+        typeorm_1.Column("varchar", {
+            nullable: true,
+            length: 50,
+            name: "prenomClient"
+        }),
+        __metadata("design:type", String)
+    ], Client.prototype, "prenomClient", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
             nullable: true,
@@ -50,7 +58,7 @@ var Client = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Client.prototype, "reservations", void 0);
     Client = __decorate([
-        typeorm_1.Entity("Client", { schema: "Berisheba" })
+        typeorm_1.Entity("Client")
     ], Client);
     return Client;
 }());

@@ -2,7 +2,7 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Doit} from "./Doit";
 
 
-@Entity("Autre" ,{schema:"Berisheba" } )
+@Entity("Autre" )
 export class Autre {
 
     @Column("varchar",{ 

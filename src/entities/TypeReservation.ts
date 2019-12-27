@@ -2,7 +2,7 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Reservation} from "./Reservation";
 
 
-@Entity("TypeReservation" ,{schema:"Berisheba" } )
+@Entity("TypeReservation" )
 export class TypeReservation {
 
     @Column("varchar",{ 

@@ -36,7 +36,7 @@ var Salle = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Salle.prototype, "reservations", void 0);
     Salle = __decorate([
-        typeorm_1.Entity("Salle", { schema: "Berisheba" })
+        typeorm_1.Entity("Salle")
     ], Salle);
     return Salle;
 }());

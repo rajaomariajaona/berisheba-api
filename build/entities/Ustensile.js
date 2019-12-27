@@ -47,7 +47,7 @@ var Ustensile = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Ustensile.prototype, "emprunts", void 0);
     Ustensile = __decorate([
-        typeorm_1.Entity("Ustensile", { schema: "Berisheba" })
+        typeorm_1.Entity("Ustensile")
     ], Ustensile);
     return Ustensile;
 }());

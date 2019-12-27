@@ -39,8 +39,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var typeorm_1 = require("typeorm");
 var Client_1 = require("../../entities/Client");
+var config_1 = require("../../config");
 var clientRoute = express_1.Router();
-typeorm_1.createConnection().then(function (connection) {
+typeorm_1.createConnection(config_1.ormconfig).then(function (connection) {
     var clientRepository = connection.getRepository(Client_1.Client);
     clientRoute.get("/", function (req, res, next) {
         clientRepository.find().then(function (clients) {
@@ -67,13 +68,22 @@ typeorm_1.createConnection().then(function (connection) {
         });
     });
     clientRoute.post("/", function (req, res, next) {
-        var c = clientRepository.create(req.body);
-        clientRepository.save(c).then(function (client) {
-            if (client)
-                res.status(201).json({ message: "added successfully" });
-            else
-                res.status(400).json({ message: "Not found" });
-        });
+        if (req.body.deleteList) {
+            clientRepository.delete(JSON.parse(req.body.deleteList)).then(function () {
+                res.status(201).json({ message: "deleted successfully" });
+            }).catch(function (error) {
+                return res.status(400).json({ message: "Not found", error: error });
+            });
+        }
+        else {
+            var c = clientRepository.create(req.body);
+            clientRepository.save(c).then(function (client) {
+                if (client)
+                    res.status(201).json({ message: "added successfully" });
+                else
+                    res.status(400).json({ message: "Not found" });
+            });
+        }
     });
     clientRoute.put("/:id", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
         var c;

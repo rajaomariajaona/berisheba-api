@@ -48,7 +48,7 @@ var Utiliser = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Utiliser.prototype, "duree", void 0);
     Utiliser = __decorate([
-        typeorm_1.Entity("Utiliser", { schema: "Berisheba" }),
+        typeorm_1.Entity("Utiliser"),
         typeorm_1.Index("fk_Appareil_has_Reservation_Reservation1", ["reservationIdReservation",])
     ], Utiliser);
     return Utiliser;

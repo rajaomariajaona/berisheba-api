@@ -28,7 +28,7 @@ var Paiement = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Paiement.prototype, "payers", void 0);
     Paiement = __decorate([
-        typeorm_1.Entity("Paiement", { schema: "Berisheba" })
+        typeorm_1.Entity("Paiement")
     ], Paiement);
     return Paiement;
 }());

@@ -11,7 +11,7 @@ import {Salle} from "./Salle";
 import {Materiels} from "./Materiels";
 
 
-@Entity("Reservation" ,{schema:"Berisheba" } )
+@Entity("Reservation" )
 @Index("fk_Reservation_Client",["clientIdClient",])
 @Index("fk_Reservation_TypeReservation1",["typeReservationTypeReservation",])
 export class Reservation {

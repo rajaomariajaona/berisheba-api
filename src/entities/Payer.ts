@@ -3,7 +3,7 @@ import {Reservation} from "./Reservation";
 import {Paiement} from "./Paiement";
 
 
-@Entity("Payer" ,{schema:"Berisheba" } )
+@Entity("Payer" )
 @Index("fk_Reservation_has_Paiement_Paiement1",["paiementTypePaiement",])
 export class Payer {
 

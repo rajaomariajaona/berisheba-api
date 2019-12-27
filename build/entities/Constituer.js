@@ -38,7 +38,7 @@ var Constituer = /** @class */ (function () {
         __metadata("design:type", String)
     ], Constituer.prototype, "demiJourneeTypeDemiJournee", void 0);
     Constituer = __decorate([
-        typeorm_1.Entity("Constituer", { schema: "Berisheba" }),
+        typeorm_1.Entity("Constituer"),
         typeorm_1.Index("fk_Constituer_DemiJournee1", ["demiJourneeDate", "demiJourneeTypeDemiJournee",])
     ], Constituer);
     return Constituer;

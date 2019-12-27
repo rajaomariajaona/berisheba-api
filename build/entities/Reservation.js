@@ -112,7 +112,7 @@ var Reservation = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Reservation.prototype, "materielss", void 0);
     Reservation = __decorate([
-        typeorm_1.Entity("Reservation", { schema: "Berisheba" }),
+        typeorm_1.Entity("Reservation"),
         typeorm_1.Index("fk_Reservation_Client", ["clientIdClient",]),
         typeorm_1.Index("fk_Reservation_TypeReservation1", ["typeReservationTypeReservation",])
     ], Reservation);
