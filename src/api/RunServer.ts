@@ -7,6 +7,5 @@ const app = express();
 app.use(bodyParser.urlencoded({extended : true}))
 app.use(bodyParser.json())
 app.use("/api", router)
-app.listen(process.env.PORT || 3000)
-return app;
+return app.listen(process.env.PORT || 3000);
 }

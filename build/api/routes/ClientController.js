@@ -84,6 +84,7 @@ typeorm_1.createConnection(config_1.ormconfig).then(function (connection) {
                     res.status(400).json({ message: "Not found" });
             });
         }
+        next();
     });
     clientRoute.put("/:id", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
         var c;
@@ -99,10 +100,14 @@ typeorm_1.createConnection(config_1.ormconfig).then(function (connection) {
                         else
                             res.status(400).json({ message: "Not found" });
                     });
+                    next();
                     return [2 /*return*/];
             }
         });
     }); });
+    clientRoute.use("*", function (req, res, next) {
+        console.log("mandalo");
+    });
 }).catch(function (error) {
     console.log(error);
 });

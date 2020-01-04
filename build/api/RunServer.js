@@ -11,7 +11,6 @@ exports.default = (function () {
     app.use(body_parser_1.default.urlencoded({ extended: true }));
     app.use(body_parser_1.default.json());
     app.use("/api", routerApi_1.default);
-    app.listen(process.env.PORT || 3000);
-    return app;
+    return app.listen(process.env.PORT || 3000);
 });
 //# sourceMappingURL=RunServer.js.map

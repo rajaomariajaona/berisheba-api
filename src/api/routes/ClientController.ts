@@ -45,7 +45,7 @@ createConnection(ormconfig).then((connection) => {
                 res.status(400).json({message : "Not found"})
         });
         }
-    
+        next()
     })
     clientRoute.put("/:id", async (req, res, next) =>{   
         var c = await clientRepository.findOne(req.params.id)   
@@ -56,6 +56,10 @@ createConnection(ormconfig).then((connection) => {
             else
                 res.status(400).json({message : "Not found"})
         });
+        next()
+    })
+    clientRoute.use("*",(req, res, next) => {
+        console.log("mandalo");
     })
 }).catch(error => { 
     console.log(error);
