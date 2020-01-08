@@ -24,10 +24,10 @@ export class Reservation {
         
 
     @Column("double precision",{ 
-        nullable:true,
+        nullable:false,
         name:"prixPersonne"
         })
-    prixPersonne:number | null;
+    prixPersonne:number ;
         
 
     @Column("double precision",{ 
@@ -41,7 +41,7 @@ export class Reservation {
         nullable:false,
         name:"etatReservation"
         })
-    etatReservation:number | null;
+    etatReservation:boolean;
         
 
     @Column("varchar",{ 
@@ -53,11 +53,11 @@ export class Reservation {
         
 
     @Column("varchar",{ 
-        nullable:true,
+        nullable:false,
         length:100,
         name:"nomReservation"
         })
-    nomReservation:string | null;
+    nomReservation:string ;
         
 
    

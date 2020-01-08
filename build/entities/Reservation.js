@@ -32,7 +32,7 @@ var Reservation = /** @class */ (function () {
     ], Reservation.prototype, "idReservation", void 0);
     __decorate([
         typeorm_1.Column("double precision", {
-            nullable: true,
+            nullable: false,
             name: "prixPersonne"
         }),
         __metadata("design:type", Number)
@@ -49,7 +49,7 @@ var Reservation = /** @class */ (function () {
             nullable: false,
             name: "etatReservation"
         }),
-        __metadata("design:type", Number)
+        __metadata("design:type", Boolean)
     ], Reservation.prototype, "etatReservation", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
@@ -61,7 +61,7 @@ var Reservation = /** @class */ (function () {
     ], Reservation.prototype, "descReservation", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
+            nullable: false,
             length: 100,
             name: "nomReservation"
         }),

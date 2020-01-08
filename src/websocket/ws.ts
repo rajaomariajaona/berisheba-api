@@ -11,15 +11,17 @@ export class MyWebSocket {
                 ws["isAlive"] = true;
                 ws.on('message', function incoming(message) {
                     MyWebSocket.wss.clients.forEach((client: WebSocket) => {
-                        if (client != ws)
-                            client.send(message);
+                        client.send(message);
+                    })
+                });
+                ws.on('ping', () => {
+                    ws.pong(() => {
                     })
                 });
                 ws.on('pong', () => {
-                    console.log("pong");
-                    this["isAlive"] = true;
+                    ws["isAlive"] = true;
                 });
-                ws.send('something');
+                ws.send('Connected');
             });
 
             const interval = setInterval(() => {

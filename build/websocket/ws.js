@@ -9,19 +9,20 @@ var MyWebSocket = /** @class */ (function () {
         if (MyWebSocket.unique == null) {
             MyWebSocket.wss = new ws_1.default.Server({ server: server });
             MyWebSocket.wss.on('connection', function connection(ws) {
-                var _this = this;
                 ws["isAlive"] = true;
                 ws.on('message', function incoming(message) {
                     MyWebSocket.wss.clients.forEach(function (client) {
-                        if (client != ws)
-                            client.send(message);
+                        client.send(message);
+                    });
+                });
+                ws.on('ping', function () {
+                    ws.pong(function () {
                     });
                 });
                 ws.on('pong', function () {
-                    console.log("pong");
-                    _this["isAlive"] = true;
+                    ws["isAlive"] = true;
                 });
-                ws.send('something');
+                ws.send('Connected');
             });
             var interval = setInterval(function () {
                 MyWebSocket.wss.clients.forEach(function (ws) {
