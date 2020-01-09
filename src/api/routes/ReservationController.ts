@@ -7,11 +7,16 @@ import { createConnection } from 'typeorm';
 import { Constituer } from '../../entities/Constituer';
 import moment = require('moment')
 import { DemiJournee } from '../../entities/DemiJournee';
+import { Client } from '../../entities/Client';
+import { TypeReservation } from '../../entities/TypeReservation';
 
 
 export default class ReservationController extends Controller {
     reservationRepository: Repository<Reservation>
     constituerRepository: Repository<Constituer>
+    clientRepository: Repository<Client>
+    demiJourneeRepository : Repository<DemiJournee>
+    typeReservationRepository : Repository<TypeReservation>
 
     constructor() {
         super()
@@ -23,6 +28,9 @@ export default class ReservationController extends Controller {
         var connection: Connection = await createConnection(ormconfig)
         this.reservationRepository = connection.getRepository(Reservation)
         this.constituerRepository = connection.getRepository(Constituer)
+        this.clientRepository = connection.getRepository(Client)
+        this.demiJourneeRepository = connection.getRepository(DemiJournee)
+        this.typeReservationRepository = connection.getRepository(TypeReservation)
     }
     addAllRoutes(router: Router): void {
         this.addGet(router)
@@ -38,7 +46,7 @@ export default class ReservationController extends Controller {
     private getReservationAndDateByWeek(router: Router) {
         router.get("/:week", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                var reservations: Object = await this.fetchReservationFromDatabase(this.parseWeekFromRequest(req))
+                var reservations: Object = await this.fetchReservationsByWeekFromDatabase(this.parseWeekFromRequest(req))
                 this.sendResponse(res, 200, { data: reservations })
             } catch (err) {
                 this.passErrorToExpress(err, next)
@@ -50,7 +58,7 @@ export default class ReservationController extends Controller {
         return req.params.week
     }
 
-    private fetchReservationFromDatabase(week: string): Promise<any> {
+    private fetchReservationsByWeekFromDatabase(week: string): Promise<any> {
         var query: string = `SELECT "Reservation"."idReservation", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", MIN(CONCAT("date", \' \' ,"TypeDemiJournee")) as "DateEntree", MAX(CONCAT("date", \' \' ,"TypeDemiJournee")) as "DateSortie" FROM "DemiJournee" JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_TypeDemiJournee" = "DemiJournee"."TypeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" HAVING DATE_PART(\'week\', MIN("date")) <= ${week} AND  DATE_PART(\'week\', MAX("date")) >= ${week}`
         return getConnection().createEntityManager().query(query)
     }
@@ -58,9 +66,24 @@ export default class ReservationController extends Controller {
     addPost(router: Router): void {
         router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                var reservation: Reservation[] = this.reservationRepository.create(req.body)
-                console.log(this.createDemiJourneeInstances(this.parseDataTimeFromRequest(req)))
+                var demiJourneesToSave: DemiJournee[] = await this.createDemiJourneeInstances(await this.parseDataTimeFromRequest(req))
+                console.log(demiJourneesToSave);
+                var demiJourneesSaved: DemiJournee[] = await this.demiJourneeRepository.save(demiJourneesToSave)
+                console.log(demiJourneesSaved);
+                var constituersToSave: Constituer[] = new Array<Constituer>()
+                var reservationToSave: Reservation = this.reservationRepository.create(req.body as Object)
+                reservationToSave.clientIdClient = await this.clientRepository.findOne(req.body.idClient)
+                reservationToSave.typeReservationTypeReservation = await this.typeReservationRepository.findOne(req.body.typeReservation)
 
+                var reservationSaved: Reservation = await this.reservationRepository.save(reservationToSave)
+                demiJourneesSaved.forEach((demiJournee : DemiJournee) => {
+                    var constituer: Constituer = new Constituer()
+                    constituer.demiJournee = demiJournee
+                    constituer.nbPersonne = Number(req.body.nbPersonne)
+                    constituer.reservationIdReservation = reservationSaved
+                    constituersToSave.push(constituer)
+                })
+                await this.constituerRepository.save(constituersToSave);
                 this.sendResponse(res, 200, { message: "Reservation has been created" })
             } catch (err) {
                 this.passErrorToExpress(err, next)
@@ -68,78 +91,15 @@ export default class ReservationController extends Controller {
         })
     }
 
-    private createDemiJourneeInstances(data: any): Array<DemiJournee> {
-        var currentDate: moment.Moment = moment(data.dateEntree);
-        const typeDemiJournee = ["Jour", "Nuit"]
-        var demiJournees: DemiJournee[] = new Array<DemiJournee>()
-        while (this.isOnInterval(currentDate, data)) {
-            if (this.isOnSortieAndNotEntree(currentDate, data)) {
-                this.cursorOnDateSortie(demiJournees, currentDate, typeDemiJournee, data)
-                break
-            } else {
-                if(this.isOnEntreeAndSortie(currentDate,data)){
-                    this.cursorOnDateEntreeAndSortie(demiJournees, currentDate, typeDemiJournee, data)
-                }
-                else if (this.isOnEntree(currentDate, data)) {
-                    this.cursorOnDateEntree(demiJournees, currentDate, typeDemiJournee, data)
-                } else {
-                    this.cursorOnDateMilieu(demiJournees, currentDate, typeDemiJournee, data)
-                }
-                this.incrementDateOneDay(currentDate)
-            }
-        }
-        return demiJournees
-    }
-
-    private isOnInterval(currentDate: moment.Moment, data: any): boolean {
-        return currentDate.isBefore(moment(data.dateSortie).add(1, 'd'))
-    }
-    private isOnSortieAndNotEntree(currentDate: moment.Moment, data: any): boolean {
-        return currentDate.isSame(moment(data.dateSortie)) && !moment(data.dateSortie).isSame(moment(data.dateEntree))
-    }
-    private isOnEntree(currentDate: moment.Moment, data: any): boolean {
-        return currentDate.isSame(moment(data.dateEntree));
-    }
-    private isOnEntreeAndSortie( currentDate: moment.Moment, data: any) : boolean{
-        return (currentDate.isSame(moment(data.dateEntree))) && (currentDate.isSame(moment(data.dateSortie))) ;
-    }
-
-    private cursorOnDateSortie(demiJournees: DemiJournee[], date: moment.Moment, typeDemiJournee: Array<string>, data: any) {
-        this.addNewDemiJournee(demiJournees, date, typeDemiJournee[0])
-        if (data.typeDemiJourneeSortie === typeDemiJournee[0])
-            return;
-        else {
-            this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1])
-            return;
-        }
-    }
-
-    private cursorOnDateEntreeAndSortie(demiJournees: DemiJournee[], date: moment.Moment, typeDemiJournee: Array<string>, data: any) {
-        this.addNewDemiJournee(demiJournees, date, data.typeDemiJourneeEntree)
-        if (data.typeDemiJourneeEntree !== data.typeDemiJourneeSortie)
-            this.addNewDemiJournee(demiJournees, date, data.typeDemiJourneeSortie)
-        return;
-    }
-
-    private cursorOnDateEntree(demiJournees: DemiJournee[], date: moment.Moment, typeDemiJournee: Array<string>, data: any) {
-        var index: number = typeDemiJournee.indexOf(data.typeDemiJourneeEntree);
-        this.addNewDemiJournee(demiJournees, date, typeDemiJournee[index])
-        if (index === 0) {
-            this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1])
-        }
-    }
-    private cursorOnDateMilieu(demiJournees: DemiJournee[], date: moment.Moment, typeDemiJournee: Array<string>, data: any) {
-        this.addNewDemiJournee(demiJournees, date, typeDemiJournee[0])
-        this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1])
-    }
-
-    private parseDataTimeFromRequest(req: Request): any {
+    private async parseDataTimeFromRequest(req: Request): Promise<any> {
         var data: any = {
             dateEntree: req.body.dateEntree,
             typeDemiJourneeEntree: req.body.typeDemiJourneeEntree,
             dateSortie: req.body.dateSortie,
             typeDemiJourneeSortie: req.body.typeDemiJourneeSortie
         }
+        console.log(data);
+        
         if (data.dateEntree == undefined || data.dateSortie == undefined || data.typeDemiJourneeEntree == undefined || data.typeDemiJourneeSortie == undefined)
             throw new Error("Some Field Uncompleted");
         if(moment(data.dateEntree).isAfter(moment(data.dateSortie)) || (moment(data.dateEntree).isSame(moment(data.dateSortie)) && data.typeDemiJourneeEntree == 'Nuit' && data.typeDemiJourneeSortie == 'Jour'))
@@ -147,7 +107,74 @@ export default class ReservationController extends Controller {
         return data
     }
 
-    private addNewDemiJournee(list: DemiJournee[], date: moment.Moment, typeDemiJournee: string) {
+    private async createDemiJourneeInstances(data: any): Promise<Array<DemiJournee>> {
+        var currentDate: moment.Moment = moment(data.dateEntree);
+        const typeDemiJournee = ["Jour", "Nuit"]
+        var demiJournees: DemiJournee[] = new Array<DemiJournee>()
+        while (await this.isOnInterval(currentDate, data)) {
+            if (await this.isOnSortieAndNotEntree(currentDate, data)) {
+                await this.cursorOnDateSortie(demiJournees, currentDate, typeDemiJournee, data)
+                break
+            } else {
+                if(await this.isOnEntreeAndSortie(currentDate,data)){
+                    await this.cursorOnDateEntreeAndSortie(demiJournees, currentDate, typeDemiJournee, data)
+                }
+                else if (await this.isOnEntree(currentDate, data)) {
+                    await this.cursorOnDateEntree(demiJournees, currentDate, typeDemiJournee, data)
+                } else {
+                    await this.cursorOnDateMilieu(demiJournees, currentDate, typeDemiJournee, data)
+                }
+                this.incrementDateOneDay(currentDate)
+            }
+        }
+        return demiJournees
+    }
+
+    private async isOnInterval(currentDate: moment.Moment, data: any): Promise<boolean> {
+        return currentDate.isBefore(moment(data.dateSortie).add(1, 'd'))
+    }
+    private async isOnSortieAndNotEntree(currentDate: moment.Moment, data: any): Promise<boolean> {
+        return currentDate.isSame(moment(data.dateSortie)) && !moment(data.dateSortie).isSame(moment(data.dateEntree))
+    }
+    private async isOnEntree(currentDate: moment.Moment, data: any): Promise<boolean> {
+        return currentDate.isSame(moment(data.dateEntree));
+    }
+    private async isOnEntreeAndSortie( currentDate: moment.Moment, data: any) : Promise<boolean>{
+        return (currentDate.isSame(moment(data.dateEntree))) && (currentDate.isSame(moment(data.dateSortie))) ;
+    }
+
+    private async cursorOnDateSortie(demiJournees: DemiJournee[], date: moment.Moment, typeDemiJournee: Array<string>, data: any) {
+        await this.addNewDemiJournee(demiJournees, date, typeDemiJournee[0])
+        if (data.typeDemiJourneeSortie === typeDemiJournee[0])
+            return;
+        else {
+            await this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1])
+            return;
+        }
+    }
+
+    private async cursorOnDateEntreeAndSortie(demiJournees: DemiJournee[], date: moment.Moment, typeDemiJournee: Array<string>, data: any) {
+        await this.addNewDemiJournee(demiJournees, date, data.typeDemiJourneeEntree)
+        if (data.typeDemiJourneeEntree !== data.typeDemiJourneeSortie)
+            await this.addNewDemiJournee(demiJournees, date, data.typeDemiJourneeSortie)
+        return;
+    }
+
+    private async cursorOnDateEntree(demiJournees: DemiJournee[], date: moment.Moment, typeDemiJournee: Array<string>, data: any) {
+        var index: number = typeDemiJournee.indexOf(data.typeDemiJourneeEntree);
+        await this.addNewDemiJournee(demiJournees, date, typeDemiJournee[index])
+        if (index === 0) {
+            await this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1])
+        }
+    }
+    private async cursorOnDateMilieu(demiJournees: DemiJournee[], date: moment.Moment, typeDemiJournee: Array<string>, data: any) {
+        await this.addNewDemiJournee(demiJournees, date, typeDemiJournee[0])
+        await this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1])
+    }
+
+
+
+    private async addNewDemiJournee(list: DemiJournee[], date: moment.Moment, typeDemiJournee: string) {
         var demiJournee: DemiJournee = new DemiJournee()
         demiJournee.TypeDemiJournee = typeDemiJournee
         demiJournee.date = date.format("YYYY-MM-DD")
