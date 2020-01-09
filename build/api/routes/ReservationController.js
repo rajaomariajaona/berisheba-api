@@ -85,117 +85,112 @@ var ReservationController = /** @class */ (function (_super) {
             });
         });
     };
-    ReservationController.prototype.addAllRoutes = function (router) {
-        this.addGet(router);
-        this.addPost(router);
-        this.addDelete(router);
-        this.addPut(router);
-        this.addErrorHandler(router);
-    };
     ReservationController.prototype.addGet = function (router) {
-        this.getReservationAndDateByWeek(router);
-    };
-    ReservationController.prototype.getReservationAndDateByWeek = function (router) {
-        var _this = this;
-        router.get("/:week", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var reservations, err_1;
+        return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.fetchReservationsByWeekFromDatabase(this.parseWeekFromRequest(req))];
+                    case 0: return [4 /*yield*/, this.getReservationAndDateByWeek(router)];
                     case 1:
-                        reservations = _a.sent();
-                        this.sendResponse(res, 200, { data: reservations });
-                        return [3 /*break*/, 3];
-                    case 2:
-                        err_1 = _a.sent();
-                        this.passErrorToExpress(err_1, next);
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
+                        _a.sent();
+                        return [2 /*return*/];
                 }
-            });
-        }); });
-    };
-    ReservationController.prototype.parseWeekFromRequest = function (req) {
-        return req.params.week;
-    };
-    ReservationController.prototype.fetchReservationsByWeekFromDatabase = function (week) {
-        var query = "SELECT \"Reservation\".\"idReservation\", \"Reservation\".\"nomReservation\", \"Reservation\".\"descReservation\", \"Reservation\".\"etatReservation\", \"Client\".\"nomClient\", \"Client\".\"prenomClient\", MIN(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateEntree\", MAX(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateSortie\" FROM \"DemiJournee\" JOIN \"Constituer\" ON \"Constituer\".\"DemiJournee_date\" = \"DemiJournee\".date AND \"Constituer\".\"DemiJournee_TypeDemiJournee\" = \"DemiJournee\".\"TypeDemiJournee\" JOIN \"Reservation\" ON \"Constituer\".\"Reservation_idReservation\" = \"Reservation\".\"idReservation\" JOIN \"Client\" ON \"Client\".\"idClient\" = \"Reservation\".\"Client_idClient\" GROUP BY \"Reservation\".\"idReservation\", \"Client\".\"idClient\" HAVING DATE_PART('week', MIN(\"date\")) <= " + week + " AND  DATE_PART('week', MAX(\"date\")) >= " + week;
-        return typeorm_1.getConnection().createEntityManager().query(query);
-    };
-    ReservationController.prototype.addPost = function (router) {
-        var _this = this;
-        router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var demiJourneesToSave, _a, demiJourneesSaved, constituersToSave, reservationToSave, _b, _c, reservationSaved, err_2;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        _d.trys.push([0, 8, , 9]);
-                        _a = this.createDemiJourneeInstances;
-                        return [4 /*yield*/, this.parseDataTimeFromRequest(req)];
-                    case 1: return [4 /*yield*/, _a.apply(this, [_d.sent()])];
-                    case 2:
-                        demiJourneesToSave = _d.sent();
-                        console.log(demiJourneesToSave);
-                        return [4 /*yield*/, this.demiJourneeRepository.save(demiJourneesToSave)];
-                    case 3:
-                        demiJourneesSaved = _d.sent();
-                        console.log(demiJourneesSaved);
-                        constituersToSave = new Array();
-                        reservationToSave = this.reservationRepository.create(req.body);
-                        _b = reservationToSave;
-                        return [4 /*yield*/, this.clientRepository.findOne(req.body.idClient)];
-                    case 4:
-                        _b.clientIdClient = _d.sent();
-                        _c = reservationToSave;
-                        return [4 /*yield*/, this.typeReservationRepository.findOne(req.body.typeReservation)];
-                    case 5:
-                        _c.typeReservationTypeReservation = _d.sent();
-                        return [4 /*yield*/, this.reservationRepository.save(reservationToSave)];
-                    case 6:
-                        reservationSaved = _d.sent();
-                        demiJourneesSaved.forEach(function (demiJournee) {
-                            var constituer = new Constituer_1.Constituer();
-                            constituer.demiJournee = demiJournee;
-                            constituer.nbPersonne = Number(req.body.nbPersonne);
-                            constituer.reservationIdReservation = reservationSaved;
-                            constituersToSave.push(constituer);
-                        });
-                        return [4 /*yield*/, this.constituerRepository.save(constituersToSave)];
-                    case 7:
-                        _d.sent();
-                        this.sendResponse(res, 200, { message: "Reservation has been created" });
-                        return [3 /*break*/, 9];
-                    case 8:
-                        err_2 = _d.sent();
-                        this.passErrorToExpress(err_2, next);
-                        return [3 /*break*/, 9];
-                    case 9: return [2 /*return*/];
-                }
-            });
-        }); });
-    };
-    ReservationController.prototype.parseDataTimeFromRequest = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            var data;
-            return __generator(this, function (_a) {
-                data = {
-                    dateEntree: req.body.dateEntree,
-                    typeDemiJourneeEntree: req.body.typeDemiJourneeEntree,
-                    dateSortie: req.body.dateSortie,
-                    typeDemiJourneeSortie: req.body.typeDemiJourneeSortie
-                };
-                console.log(data);
-                if (data.dateEntree == undefined || data.dateSortie == undefined || data.typeDemiJourneeEntree == undefined || data.typeDemiJourneeSortie == undefined)
-                    throw new Error("Some Field Uncompleted");
-                if (moment(data.dateEntree).isAfter(moment(data.dateSortie)) || (moment(data.dateEntree).isSame(moment(data.dateSortie)) && data.typeDemiJourneeEntree == 'Nuit' && data.typeDemiJourneeSortie == 'Jour'))
-                    throw new Error("Invalid data at in the demi journee data");
-                return [2 /*return*/, data];
             });
         });
     };
-    ReservationController.prototype.createDemiJourneeInstances = function (data) {
+    ReservationController.prototype.getReservationAndDateByWeek = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.get("/:week", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var reservations, _a, err_1;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                _b.trys.push([0, 5, , 7]);
+                                _a = this.fetchReservationsByWeekFromDatabase;
+                                return [4 /*yield*/, this.parseWeekFromRequest(req)];
+                            case 1: return [4 /*yield*/, _b.sent()];
+                            case 2: return [4 /*yield*/, _a.apply(this, [_b.sent()])];
+                            case 3:
+                                reservations = _b.sent();
+                                return [4 /*yield*/, this.sendResponse(res, 200, { data: reservations })];
+                            case 4:
+                                _b.sent();
+                                return [3 /*break*/, 7];
+                            case 5:
+                                err_1 = _b.sent();
+                                return [4 /*yield*/, this.passErrorToExpress(err_1, next)];
+                            case 6:
+                                _b.sent();
+                                return [3 /*break*/, 7];
+                            case 7: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
+    };
+    ReservationController.prototype.parseWeekFromRequest = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, req.params.week];
+            });
+        });
+    };
+    ReservationController.prototype.fetchReservationsByWeekFromDatabase = function (week) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        query = "SELECT \"Reservation\".\"idReservation\", \"Reservation\".\"nomReservation\", \"Reservation\".\"descReservation\", \"Reservation\".\"etatReservation\", \"Client\".\"nomClient\", \"Client\".\"prenomClient\", MIN(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateEntree\", MAX(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateSortie\" FROM \"DemiJournee\" JOIN \"Constituer\" ON \"Constituer\".\"DemiJournee_date\" = \"DemiJournee\".date AND \"Constituer\".\"DemiJournee_TypeDemiJournee\" = \"DemiJournee\".\"TypeDemiJournee\" JOIN \"Reservation\" ON \"Constituer\".\"Reservation_idReservation\" = \"Reservation\".\"idReservation\" JOIN \"Client\" ON \"Client\".\"idClient\" = \"Reservation\".\"Client_idClient\" GROUP BY \"Reservation\".\"idReservation\", \"Client\".\"idClient\" HAVING DATE_PART('week', MIN(\"date\")) <= " + week + " AND  DATE_PART('week', MAX(\"date\")) >= " + week;
+                        return [4 /*yield*/, typeorm_1.getConnection().createEntityManager().query(query)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    ReservationController.prototype.addPost = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var demiJournees, _a, reservation, err_2;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                _b.trys.push([0, 6, , 8]);
+                                _a = this.createDemiJourneesAndSaveToDatabase;
+                                return [4 /*yield*/, this.parseDataTimeFromRequest(req)];
+                            case 1: return [4 /*yield*/, _a.apply(this, [_b.sent()])];
+                            case 2:
+                                demiJournees = _b.sent();
+                                return [4 /*yield*/, this.createReservationFromRequestAndSaveToDatabase(req)];
+                            case 3:
+                                reservation = _b.sent();
+                                return [4 /*yield*/, this.createConstituersFromRequestAndSaveToDatabase(demiJournees, reservation, req)];
+                            case 4:
+                                _b.sent();
+                                return [4 /*yield*/, this.sendResponse(res, 200, { message: "Reservation has been created" })];
+                            case 5:
+                                _b.sent();
+                                return [3 /*break*/, 8];
+                            case 6:
+                                err_2 = _b.sent();
+                                return [4 /*yield*/, this.passErrorToExpress(err_2, next)];
+                            case 7:
+                                _b.sent();
+                                return [3 /*break*/, 8];
+                            case 8: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
+    };
+    ReservationController.prototype.createDemiJourneesAndSaveToDatabase = function (data) {
         return __awaiter(this, void 0, void 0, function () {
             var currentDate, typeDemiJournee, demiJournees;
             return __generator(this, function (_a) {
@@ -204,40 +199,63 @@ var ReservationController = /** @class */ (function (_super) {
                         currentDate = moment(data.dateEntree);
                         typeDemiJournee = ["Jour", "Nuit"];
                         demiJournees = new Array();
-                        _a.label = 1;
-                    case 1: return [4 /*yield*/, this.isOnInterval(currentDate, data)];
-                    case 2:
+                        return [4 /*yield*/, this.addDemiJourneeToSaveInList(demiJournees, currentDate, data, typeDemiJournee)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.saveDemiJourneeToDatabase(demiJournees)];
+                    case 2: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    ReservationController.prototype.addDemiJourneeToSaveInList = function (demiJournees, currentDate, data, typeDemiJournee) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.isOnInterval(currentDate, data)];
+                    case 1:
                         if (!_a.sent()) return [3 /*break*/, 15];
                         return [4 /*yield*/, this.isOnSortieAndNotEntree(currentDate, data)];
-                    case 3:
-                        if (!_a.sent()) return [3 /*break*/, 5];
+                    case 2:
+                        if (!_a.sent()) return [3 /*break*/, 4];
                         return [4 /*yield*/, this.cursorOnDateSortie(demiJournees, currentDate, typeDemiJournee, data)];
-                    case 4:
+                    case 3:
                         _a.sent();
                         return [3 /*break*/, 15];
-                    case 5: return [4 /*yield*/, this.isOnEntreeAndSortie(currentDate, data)];
-                    case 6:
-                        if (!_a.sent()) return [3 /*break*/, 8];
+                    case 4: return [4 /*yield*/, this.isOnEntreeAndSortie(currentDate, data)];
+                    case 5:
+                        if (!_a.sent()) return [3 /*break*/, 7];
                         return [4 /*yield*/, this.cursorOnDateEntreeAndSortie(demiJournees, currentDate, typeDemiJournee, data)];
-                    case 7:
+                    case 6:
                         _a.sent();
-                        return [3 /*break*/, 13];
-                    case 8: return [4 /*yield*/, this.isOnEntree(currentDate, data)];
-                    case 9:
-                        if (!_a.sent()) return [3 /*break*/, 11];
+                        return [3 /*break*/, 12];
+                    case 7: return [4 /*yield*/, this.isOnEntree(currentDate, data)];
+                    case 8:
+                        if (!_a.sent()) return [3 /*break*/, 10];
                         return [4 /*yield*/, this.cursorOnDateEntree(demiJournees, currentDate, typeDemiJournee, data)];
-                    case 10:
+                    case 9:
                         _a.sent();
-                        return [3 /*break*/, 13];
-                    case 11: return [4 /*yield*/, this.cursorOnDateMilieu(demiJournees, currentDate, typeDemiJournee, data)];
-                    case 12:
+                        return [3 /*break*/, 12];
+                    case 10: return [4 /*yield*/, this.cursorOnDateMilieu(demiJournees, currentDate, typeDemiJournee, data)];
+                    case 11:
                         _a.sent();
-                        _a.label = 13;
+                        _a.label = 12;
+                    case 12: return [4 /*yield*/, this.incrementDateOneDay(currentDate)];
                     case 13:
-                        this.incrementDateOneDay(currentDate);
+                        _a.sent();
                         _a.label = 14;
-                    case 14: return [3 /*break*/, 1];
-                    case 15: return [2 /*return*/, demiJournees];
+                    case 14: return [3 /*break*/, 0];
+                    case 15: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ReservationController.prototype.saveDemiJourneeToDatabase = function (demiJourneesToSave) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.demiJourneeRepository.save(demiJourneesToSave)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -352,11 +370,138 @@ var ReservationController = /** @class */ (function (_super) {
         });
     };
     ReservationController.prototype.incrementDateOneDay = function (date) {
-        date.add(1, "d");
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                date.add(1, "d");
+                return [2 /*return*/];
+            });
+        });
+    };
+    ReservationController.prototype.parseDataTimeFromRequest = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        data = {
+                            dateEntree: req.body.dateEntree,
+                            typeDemiJourneeEntree: req.body.typeDemiJourneeEntree,
+                            dateSortie: req.body.dateSortie,
+                            typeDemiJourneeSortie: req.body.typeDemiJourneeSortie
+                        };
+                        return [4 /*yield*/, this.handleDataTimeError(data)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/, data];
+                }
+            });
+        });
+    };
+    ReservationController.prototype.handleDataTimeError = function (data) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.handleRequestDataTimeIncompleteError(data)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.handleRequestDataTimeIncoherentError(data)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ReservationController.prototype.handleRequestDataTimeIncompleteError = function (data) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (data.dateEntree == undefined || data.dateSortie == undefined || data.typeDemiJourneeEntree == undefined || data.typeDemiJourneeSortie == undefined)
+                    throw new Error("Some Field Uncompleted");
+                return [2 /*return*/];
+            });
+        });
+    };
+    ReservationController.prototype.handleRequestDataTimeIncoherentError = function (data) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (moment(data.dateEntree).isAfter(moment(data.dateSortie)) || (moment(data.dateEntree).isSame(moment(data.dateSortie)) && data.typeDemiJourneeEntree == 'Nuit' && data.typeDemiJourneeSortie == 'Jour'))
+                    throw new Error("Invalid data at in the request data");
+                return [2 /*return*/];
+            });
+        });
+    };
+    ReservationController.prototype.createReservationFromRequestAndSaveToDatabase = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var reservation, _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0: return [4 /*yield*/, this.reservationRepository.save(this.reservationRepository.create(req.body))];
+                    case 1:
+                        reservation = _c.sent();
+                        _a = reservation;
+                        return [4 /*yield*/, this.clientRepository.findOne(req.body.idClient)];
+                    case 2:
+                        _a.clientIdClient = _c.sent();
+                        _b = reservation;
+                        return [4 /*yield*/, this.typeReservationRepository.findOne(req.body.typeReservation)];
+                    case 3:
+                        _b.typeReservationTypeReservation = _c.sent();
+                        return [4 /*yield*/, this.reservationRepository.save(reservation)];
+                    case 4: return [2 /*return*/, _c.sent()];
+                }
+            });
+        });
+    };
+    ReservationController.prototype.createConstituersFromRequestAndSaveToDatabase = function (demiJournees, reservation, req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var constituers;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        constituers = new Array();
+                        demiJournees.forEach(function (demiJournee) { return __awaiter(_this, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0: return [4 /*yield*/, this.addConstituerToSavedList(constituers, demiJournee, reservation, req)];
+                                    case 1:
+                                        _a.sent();
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); });
+                        return [4 /*yield*/, this.constituerRepository.save(constituers)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    ReservationController.prototype.addConstituerToSavedList = function (constituers, demiJournee, reservation, req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var constituer;
+            return __generator(this, function (_a) {
+                constituer = new Constituer_1.Constituer();
+                constituer.demiJournee = demiJournee;
+                constituer.nbPersonne = Number(req.body.nbPersonne);
+                constituer.reservationIdReservation = reservation;
+                constituers.push(constituer);
+                return [2 /*return*/];
+            });
+        });
     };
     ReservationController.prototype.addDelete = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/];
+            });
+        });
     };
     ReservationController.prototype.addPut = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/];
+            });
+        });
     };
     return ReservationController;
 }(Controller_1.Controller));
