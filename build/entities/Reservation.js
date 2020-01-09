@@ -19,7 +19,7 @@ var Emprunt_1 = require("./Emprunt");
 var Utiliser_1 = require("./Utiliser");
 var Constituer_1 = require("./Constituer");
 var Salle_1 = require("./Salle");
-var Materiels_1 = require("./Materiels");
+var Materiel_1 = require("./Materiel");
 var Reservation = /** @class */ (function () {
     function Reservation() {
     }
@@ -107,10 +107,10 @@ var Reservation = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Reservation.prototype, "salles", void 0);
     __decorate([
-        typeorm_1.ManyToMany(function () { return Materiels_1.Materiels; }, function (Materiels) { return Materiels.reservations; }, { nullable: false, }),
+        typeorm_1.ManyToMany(function () { return Materiel_1.Materiel; }, function (Materiel) { return Materiel.reservations; }, { nullable: false, }),
         typeorm_1.JoinTable({ name: 'Louer' }),
         __metadata("design:type", Array)
-    ], Reservation.prototype, "materielss", void 0);
+    ], Reservation.prototype, "materiels", void 0);
     Reservation = __decorate([
         typeorm_1.Entity("Reservation"),
         typeorm_1.Index("fk_Reservation_Client", ["clientIdClient",]),

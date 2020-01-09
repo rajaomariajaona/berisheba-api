@@ -2,22 +2,22 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Reservation} from "./Reservation";
 
 
-@Entity("Materiels" )
-export class Materiels {
+@Entity("Materiel" )
+export class Materiel {
 
     @PrimaryGeneratedColumn({
         type:"int", 
-        name:"idMateriels"
+        name:"idMateriel"
         })
-    idMateriels:number;
+    idMateriel:number;
         
 
     @Column("varchar",{ 
         nullable:true,
         length:50,
-        name:"nomMateriels"
+        name:"nomMateriel"
         })
-    nomMateriels:string | null;
+    nomMateriel:string | null;
         
 
     @Column("int",{ 
@@ -28,7 +28,7 @@ export class Materiels {
         
 
    
-    @ManyToMany(()=>Reservation, (Reservation: Reservation)=>Reservation.materielss)
+    @ManyToMany(()=>Reservation, (Reservation: Reservation)=>Reservation.materiels)
     reservations:Reservation[];
     
 }

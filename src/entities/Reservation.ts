@@ -8,7 +8,7 @@ import {Emprunt} from "./Emprunt";
 import {Utiliser} from "./Utiliser";
 import {Constituer} from "./Constituer";
 import {Salle} from "./Salle";
-import {Materiels} from "./Materiels";
+import {Materiel} from "./Materiel";
 
 
 @Entity("Reservation" )
@@ -109,8 +109,8 @@ export class Reservation {
     
 
    
-    @ManyToMany(()=>Materiels, (Materiels: Materiels)=>Materiels.reservations,{  nullable:false, })
+    @ManyToMany(()=>Materiel, (Materiel: Materiel)=>Materiel.reservations,{  nullable:false, })
     @JoinTable({ name:'Louer'})
-    materielss:Materiels[];
+    materiels:Materiel[];
     
 }
