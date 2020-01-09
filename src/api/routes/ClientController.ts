@@ -11,44 +11,38 @@ export default class ClientController extends Controller {
     clientRepository: Repository<Client>
     constructor() {
         super()
-        this.createConnectionAndAssignRepository().then((_) => {
-            this.addAllRoutes(this.mainRouter);
+        this.createConnectionAndAssignRepository().then(async (_) => {
+            await this.addAllRoutes(this.mainRouter);
         })
     }
     async createConnectionAndAssignRepository(): Promise<void> {
         var connection: Connection = await createConnection(ormconfig)
         this.clientRepository = connection.getRepository(Client)
     }
-    addAllRoutes(router: Router): void {
-        this.addGet(router)
-        this.addPost(router)
-        this.addDelete(router)
-        this.addPut(router)
-        this.addErrorHandler(router)
-    }
-    addGet(router: Router): void {
-        this.getAllClient(router)
-        this.getSingleClient(router)
+
+    async addGet(router: Router): Promise<void> {
+        await this.getAllClient(router)
+        await this.getSingleClient(router)
     }
 
-    async getAllClient(router: Router): Promise<void> {
+    private async getAllClient(router: Router): Promise<void> {
         router.get("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
                 var clients: Client[] = await this.fetchClientsFromDatabase()
-                var structuredClientData = this.useIdClientAsKey(clients)
-                this.sendResponse(res, 200, { data: structuredClientData })
+                var structuredClientData = await this.useIdClientAsKey(clients)
+                await this.sendResponse(res, 200, { data: structuredClientData })
                 next()
             } catch (err) {
-                this.passErrorToExpress(err, next)
+                await this.passErrorToExpress(err, next)
             }
         })
     }
 
-    async fetchClientsFromDatabase(): Promise<Client[]> {
-        return this.clientRepository.find()
+    private async fetchClientsFromDatabase(): Promise<Client[]> {
+        return await this.clientRepository.find()
     }
 
-    useIdClientAsKey(clients: Client[]): Object {
+    private async useIdClientAsKey(clients: Client[]): Promise<Object> {
         var obj = {};
         clients.forEach((client) => {
             obj[client["idClient"]] = client;
@@ -56,42 +50,42 @@ export default class ClientController extends Controller {
         return obj
     }
 
-    async getSingleClient(router: Router) {
+    private async getSingleClient(router: Router) {
         router.get("/:id", async (req, res, next) => {
             try {
                 var client: Client = await this.fetchClientFromDatabase(req.params.id)
-                if (this.isClientExist(client)) {
-                    this.sendResponse(res, 200, { data: client })
+                if (await this.isClientExist(client)) {
+                    await this.sendResponse(res, 200, { data: client })
                 } else {
-                    this.sendResponse(res, 404, { message: "Client Not Found" })
+                    await this.sendResponse(res, 404, { message: "Client Not Found" })
                 }
                 next()
             } catch (err) {
-                this.passErrorToExpress(err, next)
+                await this.passErrorToExpress(err, next)
             }
         })
     }
-    async fetchClientFromDatabase(id: string): Promise<Client> {
+    private async fetchClientFromDatabase(id: string): Promise<Client> {
         return this.clientRepository.findOne(id)
     }
-    isClientExist(client: Client): boolean {
+    private async isClientExist(client: Client): Promise<boolean> {
         return client !== undefined
     }
 
-    addPost(router: Router): void {
-        this.postClient(router)
+    async addPost(router: Router): Promise<void> {
+        await this.postClient(router)
     }
 
-    postClient(router: Router) {
+    async postClient(router: Router) {
         router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
                 if (!this.isDeletingMode(req)) {
-                    var clientToSave: Client[] = this.createClientFromRequest(req)
-                    var clientSaved: Client[] = await this.saveClientToDatabase(clientToSave)
-                    if (this.isClientSaved(clientSaved))
-                        this.sendResponse(res, 201, { message: "Client Added Successfully" })
+                    var clientToSave: Client = await this.createClientFromRequest(req)
+                    var clientSaved: Client = await this.saveClientToDatabase(clientToSave)
+                    if (await this.isClientSaved(clientSaved))
+                        await this.sendResponse(res, 201, { message: "Client Added Successfully" })
                     else
-                        this.sendResponse(res, 403, { message: "Client Not Added" })
+                        await this.sendResponse(res, 403, { message: "Client Not Added" })
                 }
                 next()
             } catch (err) {
@@ -100,22 +94,22 @@ export default class ClientController extends Controller {
         })
     }
 
-    isClientSaved(client: Client[]): boolean {
+    private async isClientSaved(client: Client): Promise<boolean> {
         return client !== undefined
     }
 
-    isDeletingMode(req: Request): boolean {
+    private async isDeletingMode(req: Request): Promise<boolean> {
         return req.body.deleteList;
     }
 
-    createClientFromRequest(req: Request): Client[] {
-        return this.clientRepository.create(req.body)
+    private async createClientFromRequest(req: Request): Promise<Client> {
+        return this.clientRepository.create(req.body as Object)
     }
-    async saveClientToDatabase(client: Client[]): Promise<Client[]> {
-        return this.clientRepository.save(client);
+    private async saveClientToDatabase(client: Client): Promise<Client> {
+        return await this.clientRepository.save(client);
     }
 
-    addDelete(router: Router): void {
+    async addDelete(router: Router): Promise<void> {
         router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
                 if (this.isDeletingMode(req)) {
@@ -129,14 +123,14 @@ export default class ClientController extends Controller {
         })
     }
 
-    async removeClientInDatabase(req: Request): Promise<DeleteResult> {
-        return this.clientRepository.delete(this.parseRemoveListFromRequest(req))
+    private async removeClientInDatabase(req: Request): Promise<DeleteResult> {
+        return await this.clientRepository.delete(await this.parseRemoveListFromRequest(req))
     }
-    parseRemoveListFromRequest(req: Request): number[] {
+    private async parseRemoveListFromRequest(req: Request): Promise<number[]> {
         return JSON.parse(req.body.deleteList)
     }
 
-    addPut(router: Router): void {
+    async addPut(router: Router): Promise<void> {
         router.put("/:id", async (req, res, next) => {
             try {
 
@@ -144,26 +138,25 @@ export default class ClientController extends Controller {
                 if (this.isClientExist(clientToModify)) {
                     var clientModifiedReadyToSave: Client = await this.mergeClientFromRequest(clientToModify, req)
                     var clientModified: Client = await this.updateClientInDatabase(clientModifiedReadyToSave)
-                    if (this.isClientExist(clientModified))
-                        this.sendResponse(res, 204, { message: "Client Modified Successfully" })
+                    if (await this.isClientExist(clientModified))
+                        await this.sendResponse(res, 204, { message: "Client Modified Successfully" })
                     else
-                        this.sendResponse(res, 403, { message: "Client Not Modified" })
+                        await this.sendResponse(res, 403, { message: "Client Not Modified" })
                 } else {
-                    this.sendResponse(res, 404, { message: "Client Not Found" })
+                    await this.sendResponse(res, 404, { message: "Client Not Found" })
                 }
                 next()
             } catch (err) {
-                next(err)
-
+                this.passErrorToExpress(err, next)
             }
         })
     }
 
-    async mergeClientFromRequest(clientToModify: Client, req: Request): Promise<Client> {
+    private async mergeClientFromRequest(clientToModify: Client, req: Request): Promise<Client> {
         return this.clientRepository.merge(clientToModify, req.body)
     }
-    async updateClientInDatabase(clientToUpdate: Client): Promise<Client> {
-        return this.clientRepository.save(clientToUpdate)
+    private async updateClientInDatabase(clientToUpdate: Client): Promise<Client> {
+        return await this.clientRepository.save(clientToUpdate)
     }
 
 }

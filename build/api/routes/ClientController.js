@@ -56,9 +56,16 @@ var ClientController = /** @class */ (function (_super) {
     __extends(ClientController, _super);
     function ClientController() {
         var _this = _super.call(this) || this;
-        _this.createConnectionAndAssignRepository().then(function (_) {
-            _this.addAllRoutes(_this.mainRouter);
-        });
+        _this.createConnectionAndAssignRepository().then(function (_) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.addAllRoutes(this.mainRouter)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); });
         return _this;
     }
     ClientController.prototype.createConnectionAndAssignRepository = function () {
@@ -75,16 +82,20 @@ var ClientController = /** @class */ (function (_super) {
             });
         });
     };
-    ClientController.prototype.addAllRoutes = function (router) {
-        this.addGet(router);
-        this.addPost(router);
-        this.addDelete(router);
-        this.addPut(router);
-        this.addErrorHandler(router);
-    };
     ClientController.prototype.addGet = function (router) {
-        this.getAllClient(router);
-        this.getSingleClient(router);
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getAllClient(router)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.getSingleClient(router)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     ClientController.prototype.getAllClient = function (router) {
         return __awaiter(this, void 0, void 0, function () {
@@ -95,19 +106,25 @@ var ClientController = /** @class */ (function (_super) {
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                _a.trys.push([0, 2, , 3]);
+                                _a.trys.push([0, 4, , 6]);
                                 return [4 /*yield*/, this.fetchClientsFromDatabase()];
                             case 1:
                                 clients = _a.sent();
-                                structuredClientData = this.useIdClientAsKey(clients);
-                                this.sendResponse(res, 200, { data: structuredClientData });
-                                next();
-                                return [3 /*break*/, 3];
+                                return [4 /*yield*/, this.useIdClientAsKey(clients)];
                             case 2:
+                                structuredClientData = _a.sent();
+                                return [4 /*yield*/, this.sendResponse(res, 200, { data: structuredClientData })];
+                            case 3:
+                                _a.sent();
+                                next();
+                                return [3 /*break*/, 6];
+                            case 4:
                                 err_1 = _a.sent();
-                                this.passErrorToExpress(err_1, next);
-                                return [3 /*break*/, 3];
-                            case 3: return [2 /*return*/];
+                                return [4 /*yield*/, this.passErrorToExpress(err_1, next)];
+                            case 5:
+                                _a.sent();
+                                return [3 /*break*/, 6];
+                            case 6: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -118,16 +135,24 @@ var ClientController = /** @class */ (function (_super) {
     ClientController.prototype.fetchClientsFromDatabase = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.clientRepository.find()];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.clientRepository.find()];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
             });
         });
     };
     ClientController.prototype.useIdClientAsKey = function (clients) {
-        var obj = {};
-        clients.forEach(function (client) {
-            obj[client["idClient"]] = client;
+        return __awaiter(this, void 0, void 0, function () {
+            var obj;
+            return __generator(this, function (_a) {
+                obj = {};
+                clients.forEach(function (client) {
+                    obj[client["idClient"]] = client;
+                });
+                return [2 /*return*/, obj];
+            });
         });
-        return obj;
     };
     ClientController.prototype.getSingleClient = function (router) {
         return __awaiter(this, void 0, void 0, function () {
@@ -138,23 +163,31 @@ var ClientController = /** @class */ (function (_super) {
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                _a.trys.push([0, 2, , 3]);
+                                _a.trys.push([0, 7, , 9]);
                                 return [4 /*yield*/, this.fetchClientFromDatabase(req.params.id)];
                             case 1:
                                 client = _a.sent();
-                                if (this.isClientExist(client)) {
-                                    this.sendResponse(res, 200, { data: client });
-                                }
-                                else {
-                                    this.sendResponse(res, 404, { message: "Client Not Found" });
-                                }
-                                next();
-                                return [3 /*break*/, 3];
+                                return [4 /*yield*/, this.isClientExist(client)];
                             case 2:
+                                if (!_a.sent()) return [3 /*break*/, 4];
+                                return [4 /*yield*/, this.sendResponse(res, 200, { data: client })];
+                            case 3:
+                                _a.sent();
+                                return [3 /*break*/, 6];
+                            case 4: return [4 /*yield*/, this.sendResponse(res, 404, { message: "Client Not Found" })];
+                            case 5:
+                                _a.sent();
+                                _a.label = 6;
+                            case 6:
+                                next();
+                                return [3 /*break*/, 9];
+                            case 7:
                                 err_2 = _a.sent();
-                                this.passErrorToExpress(err_2, next);
-                                return [3 /*break*/, 3];
-                            case 3: return [2 /*return*/];
+                                return [4 /*yield*/, this.passErrorToExpress(err_2, next)];
+                            case 8:
+                                _a.sent();
+                                return [3 /*break*/, 9];
+                            case 9: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -170,130 +203,200 @@ var ClientController = /** @class */ (function (_super) {
         });
     };
     ClientController.prototype.isClientExist = function (client) {
-        return client !== undefined;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, client !== undefined];
+            });
+        });
     };
     ClientController.prototype.addPost = function (router) {
-        this.postClient(router);
-    };
-    ClientController.prototype.postClient = function (router) {
-        var _this = this;
-        router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var clientToSave, clientSaved, err_3;
+        return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        if (!!this.isDeletingMode(req)) return [3 /*break*/, 2];
-                        clientToSave = this.createClientFromRequest(req);
-                        return [4 /*yield*/, this.saveClientToDatabase(clientToSave)];
+                    case 0: return [4 /*yield*/, this.postClient(router)];
                     case 1:
-                        clientSaved = _a.sent();
-                        if (this.isClientSaved(clientSaved))
-                            this.sendResponse(res, 201, { message: "Client Added Successfully" });
-                        else
-                            this.sendResponse(res, 403, { message: "Client Not Added" });
-                        _a.label = 2;
-                    case 2:
-                        next();
-                        return [3 /*break*/, 4];
-                    case 3:
-                        err_3 = _a.sent();
-                        this.passErrorToExpress(err_3, next);
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
+                        _a.sent();
+                        return [2 /*return*/];
                 }
             });
-        }); });
+        });
+    };
+    ClientController.prototype.postClient = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var clientToSave, clientSaved, err_3;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 8, , 9]);
+                                if (!!this.isDeletingMode(req)) return [3 /*break*/, 7];
+                                return [4 /*yield*/, this.createClientFromRequest(req)];
+                            case 1:
+                                clientToSave = _a.sent();
+                                return [4 /*yield*/, this.saveClientToDatabase(clientToSave)];
+                            case 2:
+                                clientSaved = _a.sent();
+                                return [4 /*yield*/, this.isClientSaved(clientSaved)];
+                            case 3:
+                                if (!_a.sent()) return [3 /*break*/, 5];
+                                return [4 /*yield*/, this.sendResponse(res, 201, { message: "Client Added Successfully" })];
+                            case 4:
+                                _a.sent();
+                                return [3 /*break*/, 7];
+                            case 5: return [4 /*yield*/, this.sendResponse(res, 403, { message: "Client Not Added" })];
+                            case 6:
+                                _a.sent();
+                                _a.label = 7;
+                            case 7:
+                                next();
+                                return [3 /*break*/, 9];
+                            case 8:
+                                err_3 = _a.sent();
+                                this.passErrorToExpress(err_3, next);
+                                return [3 /*break*/, 9];
+                            case 9: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
     };
     ClientController.prototype.isClientSaved = function (client) {
-        return client !== undefined;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, client !== undefined];
+            });
+        });
     };
     ClientController.prototype.isDeletingMode = function (req) {
-        return req.body.deleteList;
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, req.body.deleteList];
+            });
+        });
     };
     ClientController.prototype.createClientFromRequest = function (req) {
-        return this.clientRepository.create(req.body);
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.clientRepository.create(req.body)];
+            });
+        });
     };
     ClientController.prototype.saveClientToDatabase = function (client) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.clientRepository.save(client)];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.clientRepository.save(client)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
             });
         });
     };
     ClientController.prototype.addDelete = function (router) {
-        var _this = this;
-        router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var err_4;
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 3, , 4]);
-                        if (!this.isDeletingMode(req)) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.removeClientInDatabase(req)];
-                    case 1:
-                        _a.sent();
-                        res.status(201).json({ message: "deleted successfully" });
-                        _a.label = 2;
-                    case 2:
-                        next();
-                        return [3 /*break*/, 4];
-                    case 3:
-                        err_4 = _a.sent();
-                        this.passErrorToExpress(err_4, next);
-                        return [3 /*break*/, 4];
-                    case 4: return [2 /*return*/];
-                }
+                router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var err_4;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 3, , 4]);
+                                if (!this.isDeletingMode(req)) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.removeClientInDatabase(req)];
+                            case 1:
+                                _a.sent();
+                                res.status(201).json({ message: "deleted successfully" });
+                                _a.label = 2;
+                            case 2:
+                                next();
+                                return [3 /*break*/, 4];
+                            case 3:
+                                err_4 = _a.sent();
+                                this.passErrorToExpress(err_4, next);
+                                return [3 /*break*/, 4];
+                            case 4: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
             });
-        }); });
+        });
     };
     ClientController.prototype.removeClientInDatabase = function (req) {
         return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, this.clientRepository.delete(this.parseRemoveListFromRequest(req))];
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = this.clientRepository).delete;
+                        return [4 /*yield*/, this.parseRemoveListFromRequest(req)];
+                    case 1: return [4 /*yield*/, _b.apply(_a, [_c.sent()])];
+                    case 2: return [2 /*return*/, _c.sent()];
+                }
             });
         });
     };
     ClientController.prototype.parseRemoveListFromRequest = function (req) {
-        return JSON.parse(req.body.deleteList);
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, JSON.parse(req.body.deleteList)];
+            });
+        });
     };
     ClientController.prototype.addPut = function (router) {
-        var _this = this;
-        router.put("/:id", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var clientToModify, clientModifiedReadyToSave, clientModified, err_5;
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 6, , 7]);
-                        return [4 /*yield*/, this.fetchClientFromDatabase(req.params.id)];
-                    case 1:
-                        clientToModify = _a.sent();
-                        if (!this.isClientExist(clientToModify)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.mergeClientFromRequest(clientToModify, req)];
-                    case 2:
-                        clientModifiedReadyToSave = _a.sent();
-                        return [4 /*yield*/, this.updateClientInDatabase(clientModifiedReadyToSave)];
-                    case 3:
-                        clientModified = _a.sent();
-                        if (this.isClientExist(clientModified))
-                            this.sendResponse(res, 204, { message: "Client Modified Successfully" });
-                        else
-                            this.sendResponse(res, 403, { message: "Client Not Modified" });
-                        return [3 /*break*/, 5];
-                    case 4:
-                        this.sendResponse(res, 404, { message: "Client Not Found" });
-                        _a.label = 5;
-                    case 5:
-                        next();
-                        return [3 /*break*/, 7];
-                    case 6:
-                        err_5 = _a.sent();
-                        next(err_5);
-                        return [3 /*break*/, 7];
-                    case 7: return [2 /*return*/];
-                }
+                router.put("/:id", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var clientToModify, clientModifiedReadyToSave, clientModified, err_5;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 12, , 13]);
+                                return [4 /*yield*/, this.fetchClientFromDatabase(req.params.id)];
+                            case 1:
+                                clientToModify = _a.sent();
+                                if (!this.isClientExist(clientToModify)) return [3 /*break*/, 9];
+                                return [4 /*yield*/, this.mergeClientFromRequest(clientToModify, req)];
+                            case 2:
+                                clientModifiedReadyToSave = _a.sent();
+                                return [4 /*yield*/, this.updateClientInDatabase(clientModifiedReadyToSave)];
+                            case 3:
+                                clientModified = _a.sent();
+                                return [4 /*yield*/, this.isClientExist(clientModified)];
+                            case 4:
+                                if (!_a.sent()) return [3 /*break*/, 6];
+                                return [4 /*yield*/, this.sendResponse(res, 204, { message: "Client Modified Successfully" })];
+                            case 5:
+                                _a.sent();
+                                return [3 /*break*/, 8];
+                            case 6: return [4 /*yield*/, this.sendResponse(res, 403, { message: "Client Not Modified" })];
+                            case 7:
+                                _a.sent();
+                                _a.label = 8;
+                            case 8: return [3 /*break*/, 11];
+                            case 9: return [4 /*yield*/, this.sendResponse(res, 404, { message: "Client Not Found" })];
+                            case 10:
+                                _a.sent();
+                                _a.label = 11;
+                            case 11:
+                                next();
+                                return [3 /*break*/, 13];
+                            case 12:
+                                err_5 = _a.sent();
+                                this.passErrorToExpress(err_5, next);
+                                return [3 /*break*/, 13];
+                            case 13: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
             });
-        }); });
+        });
     };
     ClientController.prototype.mergeClientFromRequest = function (clientToModify, req) {
         return __awaiter(this, void 0, void 0, function () {
@@ -305,7 +408,10 @@ var ClientController = /** @class */ (function (_super) {
     ClientController.prototype.updateClientInDatabase = function (clientToUpdate) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.clientRepository.save(clientToUpdate)];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.clientRepository.save(clientToUpdate)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
             });
         });
     };
