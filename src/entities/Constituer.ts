@@ -21,13 +21,13 @@ export class Constituer {
         
 
    
-    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee.constituers,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION' })
+    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee.constituers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'DemiJournee_date', referencedColumnName: "date"})
     demiJourneeDate:DateConstructor;
 
 
    
-    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee.constituers2,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION' })
+    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee.constituers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'DemiJournee_TypeDemiJournee', referencedColumnName: "TypeDemiJournee"})
     demiJourneeTypeDemiJournee:string;
 

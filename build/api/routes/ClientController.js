@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -35,17 +48,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = require("express");
 var typeorm_1 = require("typeorm");
 var Client_1 = require("../../entities/Client");
 var config_1 = require("../../config");
-var ClientController = /** @class */ (function () {
+var Controller_1 = require("../Controller");
+var ClientController = /** @class */ (function (_super) {
+    __extends(ClientController, _super);
     function ClientController() {
-        var _this = this;
-        this.clientRouter = express_1.Router();
-        this.createConnectionAndAssignRepository().then(function (_) {
-            _this.addAllRoutes(_this.clientRouter);
+        var _this = _super.call(this) || this;
+        _this.createConnectionAndAssignRepository().then(function (_) {
+            _this.addAllRoutes(_this.mainRouter);
         });
+        return _this;
     }
     ClientController.prototype.createConnectionAndAssignRepository = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -295,20 +309,7 @@ var ClientController = /** @class */ (function () {
             });
         });
     };
-    ClientController.prototype.addErrorHandler = function (router) {
-        var _this = this;
-        router.use(function (err, req, res, next) {
-            console.log(err);
-            _this.sendResponse(res, 500, { error: err });
-        });
-    };
-    ClientController.prototype.sendResponse = function (response, statusCode, data) {
-        response.status(statusCode).json(data);
-    };
-    ClientController.prototype.passErrorToExpress = function (err, next) {
-        next(err);
-    };
     return ClientController;
-}());
+}(Controller_1.Controller));
 exports.default = ClientController;
 //# sourceMappingURL=ClientController.js.map

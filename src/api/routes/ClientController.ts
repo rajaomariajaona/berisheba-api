@@ -6,13 +6,13 @@ import { Controller } from "../Controller";
 import { Paiement } from '../../entities/Paiement';
 import router from '../routerApi';
 
-export default class ClientController implements Controller {
+export default class ClientController extends Controller {
 
-    clientRouter: Router = Router()
     clientRepository: Repository<Client>
     constructor() {
+        super()
         this.createConnectionAndAssignRepository().then((_) => {
-            this.addAllRoutes(this.clientRouter);
+            this.addAllRoutes(this.mainRouter);
         })
     }
     async createConnectionAndAssignRepository(): Promise<void> {
@@ -164,20 +164,6 @@ export default class ClientController implements Controller {
     }
     async updateClientInDatabase(clientToUpdate: Client): Promise<Client> {
         return this.clientRepository.save(clientToUpdate)
-    }
-
-    addErrorHandler(router: Router) {
-        router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-            console.log(err)
-            this.sendResponse(res, 500, { error: err })
-        })
-    }
-
-    sendResponse(response: Response, statusCode: number, data: Object) {
-        response.status(statusCode).json(data)
-    }
-    passErrorToExpress(err: Error, next: NextFunction) {
-        next(err)
     }
 
 }
