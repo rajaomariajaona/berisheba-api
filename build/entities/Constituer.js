@@ -29,7 +29,7 @@ var Constituer = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Constituer.prototype, "nbPersonne", void 0);
     __decorate([
-        typeorm_1.ManyToOne(function () { return DemiJournee_1.DemiJournee; }, function (DemiJournee) { return DemiJournee; }, { primary: true, nullable: false, onDelete: 'CASCADE', onUpdate: 'CASCADE' }),
+        typeorm_1.ManyToOne(function () { return DemiJournee_1.DemiJournee; }, function (DemiJournee) { return DemiJournee; }, { primary: true, nullable: false, onDelete: 'CASCADE', onUpdate: 'CASCADE', eager: true }),
         typeorm_1.JoinColumn([{ name: 'DemiJournee_date', referencedColumnName: "date" }, { name: 'DemiJournee_TypeDemiJournee', referencedColumnName: "TypeDemiJournee" }]),
         __metadata("design:type", DemiJournee_1.DemiJournee)
     ], Constituer.prototype, "demiJournee", void 0);

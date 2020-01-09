@@ -10,7 +10,7 @@ export class DemiJournee {
         nullable:false,
         name:"date",
         })
-    date:DateConstructor;
+    date:string;
         
 
     @Column("varchar",{ 

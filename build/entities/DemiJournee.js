@@ -20,7 +20,7 @@ var DemiJournee = /** @class */ (function () {
             nullable: false,
             name: "date",
         }),
-        __metadata("design:type", Function)
+        __metadata("design:type", String)
     ], DemiJournee.prototype, "date", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
