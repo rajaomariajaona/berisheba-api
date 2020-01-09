@@ -23,14 +23,8 @@ export class DemiJournee {
         
 
    
-    @OneToMany(()=>Constituer, (Constituer: Constituer)=>{
-        Constituer.demiJourneeTypeDemiJournee
-        Constituer.demiJourneeDate},{ onDelete: 'NO ACTION' ,onUpdate: 'NO ACTION' })
+    @OneToMany(()=>Constituer, (Constituer: Constituer)=>
+        Constituer,{ onDelete: 'NO ACTION' ,onUpdate: 'NO ACTION' })
     constituers:Constituer[];
-    
-
-   
-    // @OneToMany(()=>Constituer, (Constituer: Constituer)=>Constituer.demiJourneeTypeDemiJournee,{ onDelete: 'NO ACTION' ,onUpdate: 'NO ACTION' })
-    // constituers2:Constituer[];
     
 }

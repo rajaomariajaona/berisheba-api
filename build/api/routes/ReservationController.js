@@ -92,7 +92,7 @@ var ReservationController = /** @class */ (function (_super) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.constituerRepository.find({ relations: ["demiJourneeDate", "reservationIdReservation"] })];
+                        return [4 /*yield*/, this.constituerRepository.find({ relations: ["demiJournee", "reservationIdReservation"] })];
                     case 1:
                         constituers = _a.sent();
                         this.sendResponse(res, 200, { data: constituers });

@@ -35,7 +35,7 @@ export default class ReservationController extends Controller{
     addGet(router: Router): void {
         router.get("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                var constituers : Constituer[] = await this.constituerRepository.find({ relations: ["demiJourneeDate","reservationIdReservation"] })
+                var constituers : Constituer[] = await this.constituerRepository.find({ relations: ["demiJournee","reservationIdReservation"] })
                 this.sendResponse(res,200,{data: constituers})
             }catch(err){
                 this.passErrorToExpress(err,next)

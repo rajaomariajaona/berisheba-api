@@ -33,8 +33,7 @@ var DemiJournee = /** @class */ (function () {
     ], DemiJournee.prototype, "TypeDemiJournee", void 0);
     __decorate([
         typeorm_1.OneToMany(function () { return Constituer_1.Constituer; }, function (Constituer) {
-            Constituer.demiJourneeTypeDemiJournee;
-            Constituer.demiJourneeDate;
+            return Constituer;
         }, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
         __metadata("design:type", Array)
     ], DemiJournee.prototype, "constituers", void 0);
