@@ -54,6 +54,8 @@ var Reservation_1 = require("../../entities/Reservation");
 var config_1 = require("../../config");
 var typeorm_2 = require("typeorm");
 var Constituer_1 = require("../../entities/Constituer");
+var moment = require("moment");
+var DemiJournee_1 = require("../../entities/DemiJournee");
 var ReservationController = /** @class */ (function (_super) {
     __extends(ReservationController, _super);
     function ReservationController() {
@@ -118,6 +120,105 @@ var ReservationController = /** @class */ (function (_super) {
         return typeorm_1.getConnection().createEntityManager().query(query);
     };
     ReservationController.prototype.addPost = function (router) {
+        var _this = this;
+        router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+            var reservation;
+            return __generator(this, function (_a) {
+                try {
+                    reservation = this.reservationRepository.create(req.body);
+                    console.log(this.createDemiJourneeInstances(this.parseDataTimeFromRequest(req)));
+                    this.sendResponse(res, 200, { message: "Reservation has been created" });
+                }
+                catch (err) {
+                    this.passErrorToExpress(err, next);
+                }
+                return [2 /*return*/];
+            });
+        }); });
+    };
+    ReservationController.prototype.createDemiJourneeInstances = function (data) {
+        var currentDate = moment(data.dateEntree);
+        var typeDemiJournee = ["Jour", "Nuit"];
+        var demiJournees = new Array();
+        while (this.isOnInterval(currentDate, data)) {
+            if (this.isOnSortieAndNotEntree(currentDate, data)) {
+                this.cursorOnDateSortie(demiJournees, currentDate, typeDemiJournee, data);
+                break;
+            }
+            else {
+                if (this.isOnEntreeAndSortie(currentDate, data)) {
+                    this.cursorOnDateEntreeAndSortie(demiJournees, currentDate, typeDemiJournee, data);
+                }
+                else if (this.isOnEntree(currentDate, data)) {
+                    this.cursorOnDateEntree(demiJournees, currentDate, typeDemiJournee, data);
+                }
+                else {
+                    this.cursorOnDateMilieu(demiJournees, currentDate, typeDemiJournee, data);
+                }
+                this.incrementDateOneDay(currentDate);
+            }
+        }
+        return demiJournees;
+    };
+    ReservationController.prototype.isOnInterval = function (currentDate, data) {
+        return currentDate.isBefore(moment(data.dateSortie).add(1, 'd'));
+    };
+    ReservationController.prototype.isOnSortieAndNotEntree = function (currentDate, data) {
+        return currentDate.isSame(moment(data.dateSortie)) && !moment(data.dateSortie).isSame(moment(data.dateEntree));
+    };
+    ReservationController.prototype.isOnEntree = function (currentDate, data) {
+        return currentDate.isSame(moment(data.dateEntree));
+    };
+    ReservationController.prototype.isOnEntreeAndSortie = function (currentDate, data) {
+        return (currentDate.isSame(moment(data.dateEntree))) && (currentDate.isSame(moment(data.dateSortie)));
+    };
+    ReservationController.prototype.cursorOnDateSortie = function (demiJournees, date, typeDemiJournee, data) {
+        this.addNewDemiJournee(demiJournees, date, typeDemiJournee[0]);
+        if (data.typeDemiJourneeSortie === typeDemiJournee[0])
+            return;
+        else {
+            this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1]);
+            return;
+        }
+    };
+    ReservationController.prototype.cursorOnDateEntreeAndSortie = function (demiJournees, date, typeDemiJournee, data) {
+        this.addNewDemiJournee(demiJournees, date, data.typeDemiJourneeEntree);
+        if (data.typeDemiJourneeEntree !== data.typeDemiJourneeSortie)
+            this.addNewDemiJournee(demiJournees, date, data.typeDemiJourneeSortie);
+        return;
+    };
+    ReservationController.prototype.cursorOnDateEntree = function (demiJournees, date, typeDemiJournee, data) {
+        var index = typeDemiJournee.indexOf(data.typeDemiJourneeEntree);
+        this.addNewDemiJournee(demiJournees, date, typeDemiJournee[index]);
+        if (index === 0) {
+            this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1]);
+        }
+    };
+    ReservationController.prototype.cursorOnDateMilieu = function (demiJournees, date, typeDemiJournee, data) {
+        this.addNewDemiJournee(demiJournees, date, typeDemiJournee[0]);
+        this.addNewDemiJournee(demiJournees, date, typeDemiJournee[1]);
+    };
+    ReservationController.prototype.parseDataTimeFromRequest = function (req) {
+        var data = {
+            dateEntree: req.body.dateEntree,
+            typeDemiJourneeEntree: req.body.typeDemiJourneeEntree,
+            dateSortie: req.body.dateSortie,
+            typeDemiJourneeSortie: req.body.typeDemiJourneeSortie
+        };
+        if (data.dateEntree == undefined || data.dateSortie == undefined || data.typeDemiJourneeEntree == undefined || data.typeDemiJourneeSortie == undefined)
+            throw new Error("Some Field Uncompleted");
+        if (moment(data.dateEntree).isAfter(moment(data.dateSortie)) || (moment(data.dateEntree).isSame(moment(data.dateSortie)) && data.typeDemiJourneeEntree == 'Nuit' && data.typeDemiJourneeSortie == 'Jour'))
+            throw new Error("Invalid data at in the demi journee data");
+        return data;
+    };
+    ReservationController.prototype.addNewDemiJournee = function (list, date, typeDemiJournee) {
+        var demiJournee = new DemiJournee_1.DemiJournee();
+        demiJournee.TypeDemiJournee = typeDemiJournee;
+        demiJournee.date = date.format("YYYY-MM-DD");
+        list.push(demiJournee);
+    };
+    ReservationController.prototype.incrementDateOneDay = function (date) {
+        date.add(1, "d");
     };
     ReservationController.prototype.addDelete = function (router) {
     };
