@@ -49,9 +49,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Controller_1 = require("../Controller");
+var typeorm_1 = require("typeorm");
 var Reservation_1 = require("../../entities/Reservation");
 var config_1 = require("../../config");
-var typeorm_1 = require("typeorm");
+var typeorm_2 = require("typeorm");
 var Constituer_1 = require("../../entities/Constituer");
 var ReservationController = /** @class */ (function (_super) {
     __extends(ReservationController, _super);
@@ -67,7 +68,7 @@ var ReservationController = /** @class */ (function (_super) {
             var connection;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, typeorm_1.createConnection(config_1.ormconfig)];
+                    case 0: return [4 /*yield*/, typeorm_2.createConnection(config_1.ormconfig)];
                     case 1:
                         connection = _a.sent();
                         this.reservationRepository = connection.getRepository(Reservation_1.Reservation);
@@ -85,17 +86,20 @@ var ReservationController = /** @class */ (function (_super) {
         this.addErrorHandler(router);
     };
     ReservationController.prototype.addGet = function (router) {
+        this.getReservationAndDateByWeek(router);
+    };
+    ReservationController.prototype.getReservationAndDateByWeek = function (router) {
         var _this = this;
-        router.get("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-            var constituers, err_1;
+        router.get("/:week", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+            var reservations, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.constituerRepository.find({ relations: ["demiJournee", "reservationIdReservation"] })];
+                        return [4 /*yield*/, this.fetchReservationFromDatabase(this.parseWeekFromRequest(req))];
                     case 1:
-                        constituers = _a.sent();
-                        this.sendResponse(res, 200, { data: constituers });
+                        reservations = _a.sent();
+                        this.sendResponse(res, 200, { data: reservations });
                         return [3 /*break*/, 3];
                     case 2:
                         err_1 = _a.sent();
@@ -105,6 +109,13 @@ var ReservationController = /** @class */ (function (_super) {
                 }
             });
         }); });
+    };
+    ReservationController.prototype.parseWeekFromRequest = function (req) {
+        return req.params.week;
+    };
+    ReservationController.prototype.fetchReservationFromDatabase = function (week) {
+        var query = "SELECT \"Reservation\".\"idReservation\", \"Reservation\".\"nomReservation\", \"Reservation\".\"descReservation\", \"Reservation\".\"etatReservation\", \"Client\".\"nomClient\", \"Client\".\"prenomClient\", MIN(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateEntree\", MAX(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateSortie\" FROM \"DemiJournee\" JOIN \"Constituer\" ON \"Constituer\".\"DemiJournee_date\" = \"DemiJournee\".date AND \"Constituer\".\"DemiJournee_TypeDemiJournee\" = \"DemiJournee\".\"TypeDemiJournee\" JOIN \"Reservation\" ON \"Constituer\".\"Reservation_idReservation\" = \"Reservation\".\"idReservation\" JOIN \"Client\" ON \"Client\".\"idClient\" = \"Reservation\".\"Client_idClient\" GROUP BY \"Reservation\".\"idReservation\", \"Client\".\"idClient\" HAVING DATE_PART('week', MIN(\"date\")) <= " + week + " AND  DATE_PART('week', MAX(\"date\")) >= " + week;
+        return typeorm_1.getConnection().createEntityManager().query(query);
     };
     ReservationController.prototype.addPost = function (router) {
     };

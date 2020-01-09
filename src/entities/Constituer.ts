@@ -21,7 +21,7 @@ export class Constituer {
         
 
    
-    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
+    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' ,eager : true})
     @JoinColumn([{ name:'DemiJournee_date', referencedColumnName: "date"}, { name:'DemiJournee_TypeDemiJournee', referencedColumnName: "TypeDemiJournee"}])
     demiJournee:DemiJournee;
 
