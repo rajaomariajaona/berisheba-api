@@ -113,9 +113,9 @@ export default class ClientController extends Controller {
     }
 
     async addDelete(router: Router): Promise<void> {
-        router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+        router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                if (req.body.deleteList) {
+                if (req.headers["deleteList"]) {
                     await this.removeClientInDatabase(req)
                     res.status(201).json({ message: "deleted successfully" })
                 }
@@ -130,7 +130,8 @@ export default class ClientController extends Controller {
         return await this.clientRepository.delete(await this.parseRemoveListFromRequest(req))
     }
     private async parseRemoveListFromRequest(req: Request): Promise<number[]> {
-        return JSON.parse(req.body.deleteList)
+        var rawDeleteList: any = req.headers["deleteList"]
+        return JSON.parse(rawDeleteList)
     }
 
     async addPut(router: Router): Promise<void> {

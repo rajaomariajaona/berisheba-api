@@ -305,13 +305,13 @@ var ClientController = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                router.delete("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
                     var err_4;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
                                 _a.trys.push([0, 3, , 4]);
-                                if (!req.body.deleteList) return [3 /*break*/, 2];
+                                if (!req.headers["deleteList"]) return [3 /*break*/, 2];
                                 return [4 /*yield*/, this.removeClientInDatabase(req)];
                             case 1:
                                 _a.sent();
@@ -348,8 +348,10 @@ var ClientController = /** @class */ (function (_super) {
     };
     ClientController.prototype.parseRemoveListFromRequest = function (req) {
         return __awaiter(this, void 0, void 0, function () {
+            var rawDeleteList;
             return __generator(this, function (_a) {
-                return [2 /*return*/, JSON.parse(req.body.deleteList)];
+                rawDeleteList = req.headers["deleteList"];
+                return [2 /*return*/, JSON.parse(rawDeleteList)];
             });
         });
     };
