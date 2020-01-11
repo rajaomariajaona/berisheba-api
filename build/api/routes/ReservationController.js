@@ -99,29 +99,34 @@ var ReservationController = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                router.get("/:week", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-                    var reservations, _a, err_1;
+                router.get("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var reservations, _a, reservationsById, err_1;
                     return __generator(this, function (_b) {
                         switch (_b.label) {
                             case 0:
-                                _b.trys.push([0, 5, , 7]);
+                                _b.trys.push([0, 4, , 6]);
                                 _a = this.fetchReservationsByWeekFromDatabase;
                                 return [4 /*yield*/, this.parseWeekFromRequest(req)];
-                            case 1: return [4 /*yield*/, _b.sent()];
-                            case 2: return [4 /*yield*/, _a.apply(this, [_b.sent()])];
-                            case 3:
+                            case 1: return [4 /*yield*/, _a.apply(this, [_b.sent()])];
+                            case 2:
                                 reservations = _b.sent();
-                                return [4 /*yield*/, this.sendResponse(res, 200, { data: reservations })];
-                            case 4:
+                                reservationsById = {};
+                                Object.keys(reservations).map(function (index) {
+                                    return reservations[index];
+                                }).forEach(function (reservation) {
+                                    reservationsById[reservation["idReservation"]] = reservation;
+                                });
+                                return [4 /*yield*/, this.sendResponse(res, 200, { data: reservationsById })];
+                            case 3:
                                 _b.sent();
-                                return [3 /*break*/, 7];
-                            case 5:
+                                return [3 /*break*/, 6];
+                            case 4:
                                 err_1 = _b.sent();
                                 return [4 /*yield*/, this.passErrorToExpress(err_1, next)];
-                            case 6:
+                            case 5:
                                 _b.sent();
-                                return [3 /*break*/, 7];
-                            case 7: return [2 /*return*/];
+                                return [3 /*break*/, 6];
+                            case 6: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -131,18 +136,74 @@ var ReservationController = /** @class */ (function (_super) {
     };
     ReservationController.prototype.parseWeekFromRequest = function (req) {
         return __awaiter(this, void 0, void 0, function () {
+            var weeks, range, unique, raw, splitByComma;
+            var _this = this;
             return __generator(this, function (_a) {
-                return [2 /*return*/, req.params.week];
+                weeks = {};
+                range = new Array();
+                unique = new Array();
+                if (req.headers["range"]) {
+                    raw = req.headers["range"];
+                    splitByComma = raw.split(",");
+                    if (splitByComma.length == 0)
+                        throw new Error(req.headers["range"] + " is not Valid range of week");
+                    splitByComma.forEach(function (rangeOrUnique) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            if (this.isRange(rangeOrUnique)) {
+                                this.addRange(rangeOrUnique, range);
+                            }
+                            else if (this.isUnique(rangeOrUnique)) {
+                                this.addUnique(rangeOrUnique, unique);
+                            }
+                            else {
+                                throw new Error("Not Range and Not Number");
+                            }
+                            return [2 /*return*/];
+                        });
+                    }); });
+                }
+                else {
+                    throw new Error("No Weeks Added in body");
+                }
+                weeks["range"] = range;
+                weeks["unique"] = unique;
+                return [2 /*return*/, weeks];
             });
         });
     };
-    ReservationController.prototype.fetchReservationsByWeekFromDatabase = function (week) {
+    ReservationController.prototype.isRange = function (rangeOrUnique) {
+        return new RegExp("^\\d+-\\d+$").test(rangeOrUnique);
+    };
+    ReservationController.prototype.isUnique = function (rangeOrUnique) {
+        return new RegExp("^\\d+$").test(rangeOrUnique);
+    };
+    ReservationController.prototype.addRange = function (rangeOrUnique, range) {
+        var splitByMinus = rangeOrUnique.split("-").map(function (number) {
+            return Number(number);
+        });
+        if (splitByMinus[0] > splitByMinus[1])
+            throw new Error("Range error");
+        else {
+            range.push(splitByMinus);
+        }
+    };
+    ReservationController.prototype.addUnique = function (rangeOrUnique, unique) {
+        unique.push(Number(rangeOrUnique));
+    };
+    ReservationController.prototype.fetchReservationsByWeekFromDatabase = function (weeks) {
         return __awaiter(this, void 0, void 0, function () {
-            var query;
+            var havingConditions, query;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        query = "SELECT \"Reservation\".\"idReservation\", \"Reservation\".\"nomReservation\", \"Reservation\".\"descReservation\", \"Reservation\".\"etatReservation\", \"Client\".\"nomClient\", \"Client\".\"prenomClient\", MIN(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateEntree\", MAX(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateSortie\" FROM \"DemiJournee\" JOIN \"Constituer\" ON \"Constituer\".\"DemiJournee_date\" = \"DemiJournee\".date AND \"Constituer\".\"DemiJournee_TypeDemiJournee\" = \"DemiJournee\".\"TypeDemiJournee\" JOIN \"Reservation\" ON \"Constituer\".\"Reservation_idReservation\" = \"Reservation\".\"idReservation\" JOIN \"Client\" ON \"Client\".\"idClient\" = \"Reservation\".\"Client_idClient\" GROUP BY \"Reservation\".\"idReservation\", \"Client\".\"idClient\" HAVING DATE_PART('week', MIN(\"date\")) <= " + week + " AND  DATE_PART('week', MAX(\"date\")) >= " + week;
+                        havingConditions = new Array();
+                        weeks["unique"].forEach(function (week) {
+                            havingConditions.push("(DATE_PART('week', MIN(\"date\")) <= " + week + " AND  DATE_PART('week', MAX(\"date\")) >= " + week + ")");
+                        });
+                        weeks["range"].forEach(function (week) {
+                            havingConditions.push("(DATE_PART('week', MIN(\"date\")) <= " + week[1] + " AND  DATE_PART('week', MAX(\"date\")) >= " + week[0] + ")");
+                        });
+                        query = "SELECT \"Reservation\".\"idReservation\", \"Reservation\".\"nomReservation\", \"Reservation\".\"descReservation\", \"Reservation\".\"etatReservation\", \"Client\".\"nomClient\", \"Client\".\"prenomClient\", MIN(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateEntree\" , MAX(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateSortie\", DATE_PART('week', MIN(\"date\")) as \"SemaineEntree\", DATE_PART('week', MAX(\"date\")) as \"SemaineSortie\" FROM \"DemiJournee\"  JOIN \"Constituer\" ON \"Constituer\".\"DemiJournee_date\" = \"DemiJournee\".date AND \"Constituer\".\"DemiJournee_TypeDemiJournee\" = \"DemiJournee\".\"TypeDemiJournee\" JOIN \"Reservation\" ON \"Constituer\".\"Reservation_idReservation\" = \"Reservation\".\"idReservation\" JOIN \"Client\" ON \"Client\".\"idClient\" = \"Reservation\".\"Client_idClient\" GROUP BY \"Reservation\".\"idReservation\", \"Client\".\"idClient\" " + (havingConditions.length > 0 ? 'HAVING' : '') + " " + havingConditions.join(" OR ");
                         return [4 /*yield*/, typeorm_1.getConnection().createEntityManager().query(query)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }

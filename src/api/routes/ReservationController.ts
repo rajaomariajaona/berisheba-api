@@ -30,22 +30,78 @@ export default class ReservationController extends Controller {
     }
 
     private async getReservationAndDateByWeek(router: Router) {
-        router.get("/:week", async (req: Request, res: Response, next: NextFunction) => {
+        router.get("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                var reservations: Object = await this.fetchReservationsByWeekFromDatabase(await await this.parseWeekFromRequest(req))
-                await this.sendResponse(res, 200, { data: reservations })
+                
+                var reservations: Object = await this.fetchReservationsByWeekFromDatabase(await this.parseWeekFromRequest(req))
+                var reservationsById: Object = {}
+                Object.keys(reservations).map((index : string) => {
+                    return reservations[index]
+                }).forEach((reservation : Object) => {
+                    reservationsById[reservation["idReservation"]] = reservation
+                })
+                await this.sendResponse(res, 200, { data: reservationsById})
             } catch (err) {
                 await this.passErrorToExpress(err, next)
             }
         })
     }
 
-    private async parseWeekFromRequest(req: Request): Promise<string> {
-        return req.params.week
+    private async parseWeekFromRequest(req: Request): Promise<Object> {
+        var weeks: Object = {}
+        var range = new Array<Array<number>>();
+        var unique = new Array<number>();
+        if(req.headers["range"]){
+            var raw: any = req.headers["range"];
+            var splitByComma: Array<string> = raw.split(",");
+            if(splitByComma.length == 0)
+                throw new Error(`${req.headers["range"]} is not Valid range of week`);
+                
+            splitByComma.forEach(async (rangeOrUnique) => {
+                
+                if(this.isRange(rangeOrUnique)){
+                    this.addRange(rangeOrUnique, range)
+                }else if(this.isUnique(rangeOrUnique)){
+                    this.addUnique(rangeOrUnique,unique)
+                }else{
+                    throw new Error("Not Range and Not Number");  
+                }
+            })
+        }else{
+            throw new Error("No Weeks Added in body");
+        }
+        weeks["range"] = range
+        weeks["unique"] = unique
+        return weeks
     }
-
-    private async fetchReservationsByWeekFromDatabase(week: string): Promise<any> {
-        var query: string = `SELECT "Reservation"."idReservation", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", MIN(CONCAT("date", \' \' ,"TypeDemiJournee")) as "DateEntree", MAX(CONCAT("date", \' \' ,"TypeDemiJournee")) as "DateSortie" FROM "DemiJournee" JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_TypeDemiJournee" = "DemiJournee"."TypeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" HAVING DATE_PART(\'week\', MIN("date")) <= ${week} AND  DATE_PART(\'week\', MAX("date")) >= ${week}`
+    private isRange(rangeOrUnique: string): boolean{
+        return new RegExp("^\\d+-\\d+$").test(rangeOrUnique)
+    }
+    private isUnique(rangeOrUnique: string) : boolean {
+        return new RegExp("^\\d+$").test(rangeOrUnique)
+    }
+    private addRange(rangeOrUnique: string, range: Array<number[]>){
+        var splitByMinus: Array<number> = rangeOrUnique.split("-").map((number) => {
+            return Number(number)
+        })
+        if(splitByMinus[0] > splitByMinus[1])
+            throw new Error("Range error")
+        else{
+            range.push(splitByMinus)
+        }
+    }
+    private addUnique(rangeOrUnique: string, unique: Array<Number>){
+        unique.push(Number(rangeOrUnique))
+    }
+    private async fetchReservationsByWeekFromDatabase(weeks: Object): Promise<any> {
+        var havingConditions: Array<string> = new Array<string>();
+        weeks["unique"].forEach((week : number) => {
+            havingConditions.push(`(DATE_PART('week', MIN("date")) <= ${week} AND  DATE_PART('week', MAX("date")) >= ${week})`)
+        })
+        weeks["range"].forEach((week : Array<number>) => {
+            havingConditions.push(`(DATE_PART('week', MIN("date")) <= ${week[1]} AND  DATE_PART('week', MAX("date")) >= ${week[0]})`)
+        })
+        var query: string = `SELECT "Reservation"."idReservation", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", MIN(CONCAT("date", ' ' ,"TypeDemiJournee")) as "DateEntree" , MAX(CONCAT("date", ' ' ,"TypeDemiJournee")) as "DateSortie", DATE_PART('week', MIN("date")) as "SemaineEntree", DATE_PART('week', MAX("date")) as "SemaineSortie" FROM "DemiJournee"  JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_TypeDemiJournee" = "DemiJournee"."TypeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" ${havingConditions.length > 0 ? 'HAVING' : ''} ${havingConditions.join(" OR ")}`
         return await getConnection().createEntityManager().query(query)
     }
 
