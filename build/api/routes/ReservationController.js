@@ -69,17 +69,15 @@ var ReservationController = /** @class */ (function (_super) {
     }
     ReservationController.prototype.createConnectionAndAssignRepository = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var connection;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, typeorm_2.createConnection(config_1.ormconfig)];
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = this;
+                        return [4 /*yield*/, typeorm_2.createConnection(config_1.ormconfig)];
                     case 1:
-                        connection = _a.sent();
-                        this.reservationRepository = connection.getRepository(Reservation_1.Reservation);
-                        this.constituerRepository = connection.getRepository(Constituer_1.Constituer);
-                        this.clientRepository = connection.getRepository(Client_1.Client);
-                        this.demiJourneeRepository = connection.getRepository(DemiJournee_1.DemiJournee);
-                        this.typeReservationRepository = connection.getRepository(TypeReservation_1.TypeReservation);
+                        _a.connection = _b.sent();
+                        this.reservationRepository = this.connection.getRepository(Reservation_1.Reservation);
                         return [2 /*return*/];
                 }
             });
@@ -156,33 +154,63 @@ var ReservationController = /** @class */ (function (_super) {
             var _this = this;
             return __generator(this, function (_a) {
                 router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-                    var demiJournees, _a, reservation, err_2;
-                    return __generator(this, function (_b) {
-                        switch (_b.label) {
+                    var err_2;
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
                             case 0:
-                                _b.trys.push([0, 6, , 8]);
-                                _a = this.createDemiJourneesAndSaveToDatabase;
-                                return [4 /*yield*/, this.parseDataTimeFromRequest(req)];
-                            case 1: return [4 /*yield*/, _a.apply(this, [_b.sent()])];
-                            case 2:
-                                demiJournees = _b.sent();
-                                return [4 /*yield*/, this.createReservationFromRequestAndSaveToDatabase(req)];
-                            case 3:
-                                reservation = _b.sent();
-                                return [4 /*yield*/, this.createConstituersFromRequestAndSaveToDatabase(demiJournees, reservation, req)];
-                            case 4:
-                                _b.sent();
-                                return [4 /*yield*/, this.sendResponse(res, 200, { message: "Reservation has been created" })];
-                            case 5:
-                                _b.sent();
-                                return [3 /*break*/, 8];
-                            case 6:
-                                err_2 = _b.sent();
+                                _a.trys.push([0, 1, , 3]);
+                                this.connection.transaction(function (entityManager) { return __awaiter(_this, void 0, void 0, function () {
+                                    var demiJournees, _a, reservation, constituers;
+                                    return __generator(this, function (_b) {
+                                        switch (_b.label) {
+                                            case 0:
+                                                _a = this.createDemiJournees;
+                                                return [4 /*yield*/, this.parseDataTimeFromRequest(req)];
+                                            case 1: return [4 /*yield*/, _a.apply(this, [_b.sent()])];
+                                            case 2:
+                                                demiJournees = _b.sent();
+                                                return [4 /*yield*/, this.createReservationFromRequestAndTransactionalEntityManager(req, entityManager)];
+                                            case 3:
+                                                reservation = _b.sent();
+                                                return [4 /*yield*/, this.createConstituersFromRequest(demiJournees, reservation, req)];
+                                            case 4:
+                                                constituers = _b.sent();
+                                                return [4 /*yield*/, this.saveAllInDatabase(entityManager, demiJournees, reservation, constituers)];
+                                            case 5:
+                                                _b.sent();
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); })
+                                    .then(function (_) { return __awaiter(_this, void 0, void 0, function () {
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0: return [4 /*yield*/, this.sendResponse(res, 200, { message: "Reservation has been created" })];
+                                            case 1:
+                                                _a.sent();
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); })
+                                    .catch(function (err) { return __awaiter(_this, void 0, void 0, function () {
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0: return [4 /*yield*/, this.sendResponse(res, 403, { message: "Reservation Not Created" })];
+                                            case 1:
+                                                _a.sent();
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); });
+                                return [3 /*break*/, 3];
+                            case 1:
+                                err_2 = _a.sent();
                                 return [4 /*yield*/, this.passErrorToExpress(err_2, next)];
-                            case 7:
-                                _b.sent();
-                                return [3 /*break*/, 8];
-                            case 8: return [2 /*return*/];
+                            case 2:
+                                _a.sent();
+                                return [3 /*break*/, 3];
+                            case 3: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -190,7 +218,7 @@ var ReservationController = /** @class */ (function (_super) {
             });
         });
     };
-    ReservationController.prototype.createDemiJourneesAndSaveToDatabase = function (data) {
+    ReservationController.prototype.createDemiJournees = function (data) {
         return __awaiter(this, void 0, void 0, function () {
             var currentDate, typeDemiJournee, demiJournees;
             return __generator(this, function (_a) {
@@ -202,8 +230,7 @@ var ReservationController = /** @class */ (function (_super) {
                         return [4 /*yield*/, this.addDemiJourneeToSaveInList(demiJournees, currentDate, data, typeDemiJournee)];
                     case 1:
                         _a.sent();
-                        return [4 /*yield*/, this.saveDemiJourneeToDatabase(demiJournees)];
-                    case 2: return [2 /*return*/, _a.sent()];
+                        return [2 /*return*/, demiJournees];
                 }
             });
         });
@@ -246,16 +273,6 @@ var ReservationController = /** @class */ (function (_super) {
                         _a.label = 14;
                     case 14: return [3 /*break*/, 0];
                     case 15: return [2 /*return*/];
-                }
-            });
-        });
-    };
-    ReservationController.prototype.saveDemiJourneeToDatabase = function (demiJourneesToSave) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.demiJourneeRepository.save(demiJourneesToSave)];
-                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -430,49 +447,43 @@ var ReservationController = /** @class */ (function (_super) {
             });
         });
     };
-    ReservationController.prototype.createReservationFromRequestAndSaveToDatabase = function (req) {
+    ReservationController.prototype.createReservationFromRequestAndTransactionalEntityManager = function (req, entityManager) {
         return __awaiter(this, void 0, void 0, function () {
             var reservation, _a, _b;
             return __generator(this, function (_c) {
                 switch (_c.label) {
-                    case 0: return [4 /*yield*/, this.reservationRepository.save(this.reservationRepository.create(req.body))];
-                    case 1:
-                        reservation = _c.sent();
+                    case 0:
+                        reservation = entityManager.create(Reservation_1.Reservation, req.body);
                         _a = reservation;
-                        return [4 /*yield*/, this.clientRepository.findOne(req.body.idClient)];
-                    case 2:
+                        return [4 /*yield*/, entityManager.findOneOrFail(Client_1.Client, req.body.idClient)];
+                    case 1:
                         _a.clientIdClient = _c.sent();
                         _b = reservation;
-                        return [4 /*yield*/, this.typeReservationRepository.findOne(req.body.typeReservation)];
-                    case 3:
+                        return [4 /*yield*/, entityManager.findOneOrFail(TypeReservation_1.TypeReservation, req.body.typeReservation)];
+                    case 2:
                         _b.typeReservationTypeReservation = _c.sent();
-                        return [4 /*yield*/, this.reservationRepository.save(reservation)];
-                    case 4: return [2 /*return*/, _c.sent()];
+                        return [2 /*return*/, reservation];
                 }
             });
         });
     };
-    ReservationController.prototype.createConstituersFromRequestAndSaveToDatabase = function (demiJournees, reservation, req) {
+    ReservationController.prototype.createConstituersFromRequest = function (demiJournees, reservation, req) {
         return __awaiter(this, void 0, void 0, function () {
             var constituers;
             var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        constituers = new Array();
-                        demiJournees.forEach(function (demiJournee) { return __awaiter(_this, void 0, void 0, function () {
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
-                                    case 0: return [4 /*yield*/, this.addConstituerToSavedList(constituers, demiJournee, reservation, req)];
-                                    case 1:
-                                        _a.sent();
-                                        return [2 /*return*/];
-                                }
-                            });
-                        }); });
-                        return [4 /*yield*/, this.constituerRepository.save(constituers)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
+                constituers = new Array();
+                demiJournees.forEach(function (demiJournee) { return __awaiter(_this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, this.addConstituerToSavedList(constituers, demiJournee, reservation, req)];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/, constituers];
             });
         });
     };
@@ -489,17 +500,132 @@ var ReservationController = /** @class */ (function (_super) {
             });
         });
     };
-    ReservationController.prototype.addDelete = function (router) {
+    ReservationController.prototype.saveAllInDatabase = function (entityManager, demiJournees, reservation, constituers) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, entityManager.save(DemiJournee_1.DemiJournee, demiJournees)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, entityManager.save(Reservation_1.Reservation, reservation)];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, entityManager.save(Constituer_1.Constituer, constituers)];
+                    case 3:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ReservationController.prototype.addDelete = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.delete("/:idReservation", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var result, _a, _b, err_3;
+                    return __generator(this, function (_c) {
+                        switch (_c.label) {
+                            case 0:
+                                _c.trys.push([0, 8, , 10]);
+                                _b = (_a = this.reservationRepository).delete;
+                                return [4 /*yield*/, this.parseIdReservationFromRequest(req)];
+                            case 1: return [4 /*yield*/, _b.apply(_a, [_c.sent()])];
+                            case 2:
+                                result = _c.sent();
+                                return [4 /*yield*/, this.isDeleted(result)];
+                            case 3:
+                                if (!_c.sent()) return [3 /*break*/, 5];
+                                return [4 /*yield*/, this.sendResponse(res, 204, { message: "Reservation deleted successfully" })];
+                            case 4:
+                                _c.sent();
+                                return [3 /*break*/, 7];
+                            case 5: return [4 /*yield*/, this.sendResponse(res, 403, { message: "None Reservation has been deleted" })];
+                            case 6:
+                                _c.sent();
+                                _c.label = 7;
+                            case 7: return [3 /*break*/, 10];
+                            case 8:
+                                err_3 = _c.sent();
+                                return [4 /*yield*/, this.passErrorToExpress(err_3, next)];
+                            case 9:
+                                _c.sent();
+                                return [3 /*break*/, 10];
+                            case 10: return [2 /*return*/];
+                        }
+                    });
+                }); });
                 return [2 /*return*/];
+            });
+        });
+    };
+    ReservationController.prototype.parseIdReservationFromRequest = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, req.params.idReservation];
+            });
+        });
+    };
+    ReservationController.prototype.isDeleted = function (result) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, result.affected !== 0];
             });
         });
     };
     ReservationController.prototype.addPut = function (router) {
         return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
             return __generator(this, function (_a) {
+                router.put("/idReservation", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var reservation, _a, _b, reservationMerged, err_4;
+                    return __generator(this, function (_c) {
+                        switch (_c.label) {
+                            case 0:
+                                _c.trys.push([0, 6, , 8]);
+                                _b = (_a = this.reservationRepository).findOneOrFail;
+                                return [4 /*yield*/, this.parseIdReservationFromRequest(req)];
+                            case 1: return [4 /*yield*/, _b.apply(_a, [_c.sent()])];
+                            case 2:
+                                reservation = _c.sent();
+                                return [4 /*yield*/, this.mergeReservationWithRequest(reservation, req)];
+                            case 3:
+                                reservationMerged = _c.sent();
+                                return [4 /*yield*/, this.updateReservationInDatabase(reservationMerged)];
+                            case 4:
+                                _c.sent();
+                                return [4 /*yield*/, this.sendResponse(res, 200, { message: "Reservation Updated" })];
+                            case 5:
+                                _c.sent();
+                                return [3 /*break*/, 8];
+                            case 6:
+                                err_4 = _c.sent();
+                                return [4 /*yield*/, this.passErrorToExpress(err_4, next)];
+                            case 7:
+                                _c.sent();
+                                return [3 /*break*/, 8];
+                            case 8: return [2 /*return*/];
+                        }
+                    });
+                }); });
                 return [2 /*return*/];
+            });
+        });
+    };
+    ReservationController.prototype.mergeReservationWithRequest = function (reservation, req) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.reservationRepository.merge(req.body, reservation)];
+            });
+        });
+    };
+    ReservationController.prototype.updateReservationInDatabase = function (reservation) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.reservationRepository.save(reservation)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
             });
         });
     };
