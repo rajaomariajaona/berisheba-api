@@ -79,7 +79,7 @@ export default class ClientController extends Controller {
     async postClient(router: Router) {
         router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                if (!this.isDeletingMode(req)) {
+                if (!req.body.deleteList) {
                     var clientToSave: Client = await this.createClientFromRequest(req)
                     var clientSaved: Client = await this.saveClientToDatabase(clientToSave)
                     if (await this.isClientSaved(clientSaved))
@@ -89,7 +89,7 @@ export default class ClientController extends Controller {
                 }
                 next()
             } catch (err) {
-                this.passErrorToExpress(err, next)
+                await this.passErrorToExpress(err, next)
             }
         })
     }
@@ -99,7 +99,10 @@ export default class ClientController extends Controller {
     }
 
     private async isDeletingMode(req: Request): Promise<boolean> {
-        return req.body.deleteList;
+        if(req.body.deleteList)
+            return true;
+        else
+            return false
     }
 
     private async createClientFromRequest(req: Request): Promise<Client> {
@@ -112,7 +115,7 @@ export default class ClientController extends Controller {
     async addDelete(router: Router): Promise<void> {
         router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                if (this.isDeletingMode(req)) {
+                if (req.body.deleteList) {
                     await this.removeClientInDatabase(req)
                     res.status(201).json({ message: "deleted successfully" })
                 }

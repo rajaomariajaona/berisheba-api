@@ -230,8 +230,8 @@ var ClientController = /** @class */ (function (_super) {
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                _a.trys.push([0, 8, , 9]);
-                                if (!!this.isDeletingMode(req)) return [3 /*break*/, 7];
+                                _a.trys.push([0, 8, , 10]);
+                                if (!!req.body.deleteList) return [3 /*break*/, 7];
                                 return [4 /*yield*/, this.createClientFromRequest(req)];
                             case 1:
                                 clientToSave = _a.sent();
@@ -251,12 +251,14 @@ var ClientController = /** @class */ (function (_super) {
                                 _a.label = 7;
                             case 7:
                                 next();
-                                return [3 /*break*/, 9];
+                                return [3 /*break*/, 10];
                             case 8:
                                 err_3 = _a.sent();
-                                this.passErrorToExpress(err_3, next);
-                                return [3 /*break*/, 9];
-                            case 9: return [2 /*return*/];
+                                return [4 /*yield*/, this.passErrorToExpress(err_3, next)];
+                            case 9:
+                                _a.sent();
+                                return [3 /*break*/, 10];
+                            case 10: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -274,7 +276,11 @@ var ClientController = /** @class */ (function (_super) {
     ClientController.prototype.isDeletingMode = function (req) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, req.body.deleteList];
+                if (req.body.deleteList)
+                    return [2 /*return*/, true];
+                else
+                    return [2 /*return*/, false];
+                return [2 /*return*/];
             });
         });
     };
@@ -305,7 +311,7 @@ var ClientController = /** @class */ (function (_super) {
                         switch (_a.label) {
                             case 0:
                                 _a.trys.push([0, 3, , 4]);
-                                if (!this.isDeletingMode(req)) return [3 /*break*/, 2];
+                                if (!req.body.deleteList) return [3 /*break*/, 2];
                                 return [4 /*yield*/, this.removeClientInDatabase(req)];
                             case 1:
                                 _a.sent();
