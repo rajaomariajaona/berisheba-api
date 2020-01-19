@@ -16,8 +16,13 @@ export default class ClientController extends Controller {
         })
     }
     async createConnectionAndAssignRepository(): Promise<void> {
-        var connection: Connection = await createConnection(ormconfig)
-        this.clientRepository = connection.getRepository(Client)
+        try {
+            var connection: Connection = await createConnection(ormconfig)
+            this.clientRepository = connection.getRepository(Client)    
+        } catch (error) {
+            console.log(error)
+        }
+        
     }
 
     async addGet(router: Router): Promise<void> {
@@ -79,14 +84,12 @@ export default class ClientController extends Controller {
     async postClient(router: Router) {
         router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                if (!req.body.deleteList) {
                     var clientToSave: Client = await this.createClientFromRequest(req)
                     var clientSaved: Client = await this.saveClientToDatabase(clientToSave)
                     if (await this.isClientSaved(clientSaved))
                         await this.sendResponse(res, 201, { message: "Client Added Successfully" })
                     else
                         await this.sendResponse(res, 403, { message: "Client Not Added" })
-                }
                 next()
             } catch (err) {
                 await this.passErrorToExpress(err, next)
@@ -115,11 +118,8 @@ export default class ClientController extends Controller {
     async addDelete(router: Router): Promise<void> {
         router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                if (req.headers["deleteList"]) {
-                    await this.removeClientInDatabase(req)
-                    res.status(201).json({ message: "deleted successfully" })
-                }
-                next()
+                await this.removeClientInDatabase(req)
+                res.status(204).json({ message: "deleted successfully" })
             } catch (err) {
                 this.passErrorToExpress(err, next)
             }
@@ -130,7 +130,7 @@ export default class ClientController extends Controller {
         return await this.clientRepository.delete(await this.parseRemoveListFromRequest(req))
     }
     private async parseRemoveListFromRequest(req: Request): Promise<number[]> {
-        var rawDeleteList: any = req.headers["deleteList"]
+        var rawDeleteList: any = req.headers["deletelist"]
         return JSON.parse(rawDeleteList)
     }
 
