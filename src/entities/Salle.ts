@@ -5,16 +5,15 @@ import {Reservation} from "./Reservation";
 @Entity("Salle" )
 export class Salle {
 
-    @Column("varchar",{ 
-        nullable:false,
-        primary:true,
-        length:10,
-        name:"idSalle"
+
+    @PrimaryGeneratedColumn({
+        type:"int", 
+        name:"idSalle",
         })
-    idSalle:string;
-        
+        idSalle:number;
 
     @Column("varchar",{ 
+        unique: true,
         nullable:true,
         length:100,
         name:"nomSalle"
