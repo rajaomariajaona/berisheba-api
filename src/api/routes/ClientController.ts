@@ -101,13 +101,6 @@ export default class ClientController extends Controller {
         return client !== undefined
     }
 
-    private async isDeletingMode(req: Request): Promise<boolean> {
-        if(req.body.deleteList)
-            return true;
-        else
-            return false
-    }
-
     private async createClientFromRequest(req: Request): Promise<Client> {
         return this.clientRepository.create(req.body as Object)
     }
