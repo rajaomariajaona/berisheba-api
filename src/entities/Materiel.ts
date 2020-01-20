@@ -13,18 +13,18 @@ export class Materiel {
         
 
     @Column("varchar",{ 
-        nullable:true,
+        nullable:false,
         length:50,
         name:"nomMateriel"
         })
-    nomMateriel:string | null;
+    nomMateriel:string;
         
 
     @Column("int",{ 
-        nullable:true,
+        nullable:false,
         name:"nbStock"
         })
-    nbStock:number | null;
+    nbStock:number;
         
 
    
