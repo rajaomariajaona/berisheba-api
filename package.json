@@ -6,8 +6,8 @@
    "scripts": {
       "watch-typescript": "npx tsc -w",
       "watch-javascript": "npx nodemon build/index.js",
-      "start-dev": "npx concurrently --kill-others npm:watch-*",
-      "start": "node build/index.js"
+      "start": "npx concurrently --kill-others npm:watch-*",
+      "start-test": "node build/index.js"
    },
    "author": "",
    "license": "ISC",
