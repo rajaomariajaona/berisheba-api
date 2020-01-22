@@ -10,20 +10,20 @@ export class Doit {
    
     @ManyToOne(()=>Autre, (Autre: Autre)=>Autre.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Autre_typeAutre'})
-    autreTypeAutre:Autre | null;
+    autreTypeAutre:Autre;
 
 
    
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
-    reservationIdReservation:Reservation | null;
+    reservationIdReservation:Reservation;
 
 
     @Column("double precision",{ 
-        nullable:true,
+        nullable:false,
         name:"prixAutre"
         })
-    prixAutre:number | null;
+    prixAutre:number;
         
 
     @Column("varchar",{ 

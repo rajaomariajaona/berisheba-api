@@ -42,6 +42,13 @@ export class Reservation {
         name:"etatReservation"
         })
     etatReservation:boolean;
+
+
+    @Column("boolean",{ 
+        nullable:false,
+        name:"nbPersonneIdentique"
+        })
+    nbPersonneIdentique:boolean;
         
 
     @Column("varchar",{ 

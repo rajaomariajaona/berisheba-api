@@ -10,26 +10,18 @@ export class Rendre {
    
     @ManyToOne(()=>Ustensile, (Ustensile: Ustensile)=>Ustensile.rendres,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Ustensile_idUstensile'})
-    ustensileIdUstensile:Ustensile | null;
+    ustensileIdUstensile:Ustensile;
 
 
    
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.rendres,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
-    reservationIdReservation:Reservation | null;
-
-
-    @Column("date",{ 
-        nullable:true,
-        name:"dateRendue"
-        })
-    dateRendue:string | null;
-        
+    reservationIdReservation:Reservation;        
 
     @Column("int",{ 
-        nullable:true,
+        nullable:false,
         name:"nbRendue"
         })
-    nbRendue:number | null;
+    nbRendue:number;
         
 }

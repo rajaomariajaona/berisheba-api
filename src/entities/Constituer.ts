@@ -10,14 +10,14 @@ export class Constituer {
    
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.constituers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
-    reservationIdReservation:Reservation | null;
+    reservationIdReservation:Reservation;
 
 
     @Column("int",{ 
-        nullable:true,
+        nullable:false,
         name:"nbPersonne"
         })
-    nbPersonne:number | null;
+    nbPersonne:number;
         
 
    

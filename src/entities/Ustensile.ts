@@ -14,19 +14,18 @@ export class Ustensile {
         
 
     @Column("varchar",{ 
-        nullable:true,
+        nullable:false,
         length:100,
         name:"nomUstensile"
         })
-    nomUstensile:string | null;
+    nomUstensile:string;
         
 
-    @Column("varchar",{ 
+    @Column("int",{ 
         nullable:true,
-        length:45,
-        name:"nbDisponible"
+        name:"nbTotal"
         })
-    nbDisponible:string | null;
+    nbTotal:number;
         
 
    

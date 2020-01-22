@@ -14,11 +14,11 @@ export class Salle {
 
     @Column("varchar",{ 
         unique: true,
-        nullable:true,
+        nullable:false,
         length:100,
         name:"nomSalle"
         })
-    nomSalle:string | null;
+    nomSalle:string;
         
 
    

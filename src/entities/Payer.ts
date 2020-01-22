@@ -10,27 +10,18 @@ export class Payer {
    
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.payers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
-    reservationIdReservation:Reservation | null;
+    reservationIdReservation:Reservation;
 
 
    
     @ManyToOne(()=>Paiement, (Paiement: Paiement)=>Paiement.payers,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION' })
     @JoinColumn({ name:'Paiement_typePaiement'})
-    paiementTypePaiement:Paiement | null;
+    paiementTypePaiement:Paiement;
 
-
-    @Column("date",{ 
-        nullable:true,
-        name:"datePaiement"
-        })
-    datePaiement:string | null;
-        
-
-    @Column("varchar",{ 
-        nullable:true,
-        length:45,
+    @Column("double precision",{ 
+        nullable:false,
         name:"sommePayee"
         })
-    sommePayee:string | null;
+    sommePayee:number;
         
 }
