@@ -115,9 +115,10 @@ export default class ReservationController extends Controller {
                     await this.saveAllInDatabase(entityManager, demiJournees, reservation, constituers)
                 })
                 .then(async (_) => {
-                    await this.sendResponse(res, 200, { message: "Reservation has been created" })
+                    await this.sendResponse(res, 201, { message: "Reservation has been created"})
                 })
                 .catch(async (err) => {
+                    console.log(err)
                     await this.sendResponse(res, 403, { message: "Reservation Not Created" })
                 })
             } catch (err) {
@@ -252,7 +253,7 @@ export default class ReservationController extends Controller {
         constituers.push(constituer)
     }
 
-    private async saveAllInDatabase(entityManager: EntityManager, demiJournees: DemiJournee[], reservation: Reservation, constituers: Constituer[]) {
+    private async saveAllInDatabase(entityManager: EntityManager, demiJournees: DemiJournee[], reservation: Reservation, constituers: Constituer[]){
         await entityManager.save(DemiJournee, demiJournees)
         await entityManager.save(Reservation, reservation)
         await entityManager.save(Constituer, constituers)
