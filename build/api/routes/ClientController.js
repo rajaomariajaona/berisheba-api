@@ -70,14 +70,21 @@ var ClientController = /** @class */ (function (_super) {
     }
     ClientController.prototype.createConnectionAndAssignRepository = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var connection;
+            var connection, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, typeorm_1.createConnection(config_1.ormconfig)];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, typeorm_1.createConnection(config_1.ormconfig)];
                     case 1:
                         connection = _a.sent();
                         this.clientRepository = connection.getRepository(Client_1.Client);
-                        return [2 /*return*/];
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_1 = _a.sent();
+                        console.log(error_1);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
@@ -231,7 +238,6 @@ var ClientController = /** @class */ (function (_super) {
                         switch (_a.label) {
                             case 0:
                                 _a.trys.push([0, 8, , 10]);
-                                if (!!req.body.deleteList) return [3 /*break*/, 7];
                                 return [4 /*yield*/, this.createClientFromRequest(req)];
                             case 1:
                                 clientToSave = _a.sent();
@@ -273,17 +279,6 @@ var ClientController = /** @class */ (function (_super) {
             });
         });
     };
-    ClientController.prototype.isDeletingMode = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (req.body.deleteList)
-                    return [2 /*return*/, true];
-                else
-                    return [2 /*return*/, false];
-                return [2 /*return*/];
-            });
-        });
-    };
     ClientController.prototype.createClientFromRequest = function (req) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -310,21 +305,17 @@ var ClientController = /** @class */ (function (_super) {
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                _a.trys.push([0, 3, , 4]);
-                                if (!req.headers["deleteList"]) return [3 /*break*/, 2];
+                                _a.trys.push([0, 2, , 3]);
                                 return [4 /*yield*/, this.removeClientInDatabase(req)];
                             case 1:
                                 _a.sent();
-                                res.status(201).json({ message: "deleted successfully" });
-                                _a.label = 2;
+                                res.status(204).json({ message: "deleted successfully" });
+                                return [3 /*break*/, 3];
                             case 2:
-                                next();
-                                return [3 /*break*/, 4];
-                            case 3:
                                 err_4 = _a.sent();
                                 this.passErrorToExpress(err_4, next);
-                                return [3 /*break*/, 4];
-                            case 4: return [2 /*return*/];
+                                return [3 /*break*/, 3];
+                            case 3: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -350,7 +341,7 @@ var ClientController = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             var rawDeleteList;
             return __generator(this, function (_a) {
-                rawDeleteList = req.headers["deleteList"];
+                rawDeleteList = req.headers["deletelist"];
                 return [2 /*return*/, JSON.parse(rawDeleteList)];
             });
         });

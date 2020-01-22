@@ -23,7 +23,7 @@ var Constituer = /** @class */ (function () {
     ], Constituer.prototype, "reservationIdReservation", void 0);
     __decorate([
         typeorm_1.Column("int", {
-            nullable: true,
+            nullable: false,
             name: "nbPersonne"
         }),
         __metadata("design:type", Number)

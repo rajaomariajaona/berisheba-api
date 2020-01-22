@@ -52,7 +52,6 @@ var Controller_1 = require("../Controller");
 var typeorm_1 = require("typeorm");
 var Reservation_1 = require("../../entities/Reservation");
 var config_1 = require("../../config");
-var typeorm_2 = require("typeorm");
 var Constituer_1 = require("../../entities/Constituer");
 var moment = require("moment");
 var DemiJournee_1 = require("../../entities/DemiJournee");
@@ -74,7 +73,7 @@ var ReservationController = /** @class */ (function (_super) {
                 switch (_b.label) {
                     case 0:
                         _a = this;
-                        return [4 /*yield*/, typeorm_2.createConnection(config_1.ormconfig)];
+                        return [4 /*yield*/, typeorm_1.createConnection(config_1.ormconfig)];
                     case 1:
                         _a.connection = _b.sent();
                         this.reservationRepository = this.connection.getRepository(Reservation_1.Reservation);
@@ -203,7 +202,7 @@ var ReservationController = /** @class */ (function (_super) {
                         weeks["range"].forEach(function (week) {
                             havingConditions.push("(DATE_PART('week', MIN(\"date\")) <= " + week[1] + " AND  DATE_PART('week', MAX(\"date\")) >= " + week[0] + ")");
                         });
-                        query = "SELECT \"Reservation\".\"idReservation\", \"Reservation\".\"nomReservation\", \"Reservation\".\"descReservation\", \"Reservation\".\"etatReservation\", \"Client\".\"nomClient\", \"Client\".\"prenomClient\", MIN(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateEntree\" , MAX(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")) as \"DateSortie\", DATE_PART('week', MIN(\"date\")) as \"SemaineEntree\", DATE_PART('week', MAX(\"date\")) as \"SemaineSortie\" FROM \"DemiJournee\"  JOIN \"Constituer\" ON \"Constituer\".\"DemiJournee_date\" = \"DemiJournee\".date AND \"Constituer\".\"DemiJournee_TypeDemiJournee\" = \"DemiJournee\".\"TypeDemiJournee\" JOIN \"Reservation\" ON \"Constituer\".\"Reservation_idReservation\" = \"Reservation\".\"idReservation\" JOIN \"Client\" ON \"Client\".\"idClient\" = \"Reservation\".\"Client_idClient\" GROUP BY \"Reservation\".\"idReservation\", \"Client\".\"idClient\" " + (havingConditions.length > 0 ? 'HAVING' : '') + " " + havingConditions.join(" OR ");
+                        query = "SELECT \"Reservation\".\"idReservation\", \"Reservation\".\"nomReservation\", \"Reservation\".\"descReservation\", \"Reservation\".\"prixPersonne\", \"Reservation\".\"couleur\", \"Reservation\".\"etatReservation\", \"Client\".\"nomClient\", \"Client\".\"prenomClient\", split_part(MIN(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")),' ', 1) as \"DateEntree\",\n        split_part(MIN(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")),' ', 2) as \"TypeDemiJourneeEntree\", split_part(MAX(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")), ' ', 1) as \"DateSortie\", split_part(MAX(CONCAT(\"date\", ' ' ,\"TypeDemiJournee\")), ' ', 2) as \"TypeDemiJourneeSortie\", DATE_PART('week', MIN(\"date\")) as \"SemaineEntree\", DATE_PART('week', MAX(\"date\")) as \"SemaineSortie\" FROM \"DemiJournee\"  JOIN \"Constituer\" ON \"Constituer\".\"DemiJournee_date\" = \"DemiJournee\".date AND \"Constituer\".\"DemiJournee_TypeDemiJournee\" = \"DemiJournee\".\"TypeDemiJournee\" JOIN \"Reservation\" ON \"Constituer\".\"Reservation_idReservation\" = \"Reservation\".\"idReservation\" JOIN \"Client\" ON \"Client\".\"idClient\" = \"Reservation\".\"Client_idClient\" GROUP BY \"Reservation\".\"idReservation\", \"Client\".\"idClient\" " + (havingConditions.length > 0 ? 'HAVING' : '') + " " + havingConditions.join(" OR ");
                         return [4 /*yield*/, typeorm_1.getConnection().createEntityManager().query(query)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
@@ -247,7 +246,7 @@ var ReservationController = /** @class */ (function (_super) {
                                     .then(function (_) { return __awaiter(_this, void 0, void 0, function () {
                                     return __generator(this, function (_a) {
                                         switch (_a.label) {
-                                            case 0: return [4 /*yield*/, this.sendResponse(res, 200, { message: "Reservation has been created" })];
+                                            case 0: return [4 /*yield*/, this.sendResponse(res, 201, { message: "Reservation has been created" })];
                                             case 1:
                                                 _a.sent();
                                                 return [2 /*return*/];
@@ -257,7 +256,9 @@ var ReservationController = /** @class */ (function (_super) {
                                     .catch(function (err) { return __awaiter(_this, void 0, void 0, function () {
                                     return __generator(this, function (_a) {
                                         switch (_a.label) {
-                                            case 0: return [4 /*yield*/, this.sendResponse(res, 403, { message: "Reservation Not Created" })];
+                                            case 0:
+                                                console.log(err);
+                                                return [4 /*yield*/, this.sendResponse(res, 403, { message: "Reservation Not Created" })];
                                             case 1:
                                                 _a.sent();
                                                 return [2 /*return*/];

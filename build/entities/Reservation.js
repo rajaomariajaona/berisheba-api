@@ -52,6 +52,13 @@ var Reservation = /** @class */ (function () {
         __metadata("design:type", Boolean)
     ], Reservation.prototype, "etatReservation", void 0);
     __decorate([
+        typeorm_1.Column("boolean", {
+            nullable: false,
+            name: "nbPersonneIdentique"
+        }),
+        __metadata("design:type", Boolean)
+    ], Reservation.prototype, "nbPersonneIdentique", void 0);
+    __decorate([
         typeorm_1.Column("varchar", {
             nullable: true,
             name: "descReservation",
@@ -67,6 +74,14 @@ var Reservation = /** @class */ (function () {
         }),
         __metadata("design:type", String)
     ], Reservation.prototype, "nomReservation", void 0);
+    __decorate([
+        typeorm_1.Column("char", {
+            nullable: true,
+            length: 10,
+            name: "couleur"
+        }),
+        __metadata("design:type", String)
+    ], Reservation.prototype, "couleur", void 0);
     __decorate([
         typeorm_1.ManyToOne(function () { return Client_1.Client; }, function (Client) { return Client.reservations; }, { nullable: false, onDelete: 'CASCADE', onUpdate: 'CASCADE' }),
         typeorm_1.JoinColumn({ name: 'Client_idClient' }),

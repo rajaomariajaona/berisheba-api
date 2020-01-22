@@ -15,17 +15,16 @@ var Salle = /** @class */ (function () {
     function Salle() {
     }
     __decorate([
-        typeorm_1.Column("varchar", {
-            nullable: false,
-            primary: true,
-            length: 10,
-            name: "idSalle"
+        typeorm_1.PrimaryGeneratedColumn({
+            type: "int",
+            name: "idSalle",
         }),
-        __metadata("design:type", String)
+        __metadata("design:type", Number)
     ], Salle.prototype, "idSalle", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
+            unique: true,
+            nullable: false,
             length: 100,
             name: "nomSalle"
         }),
