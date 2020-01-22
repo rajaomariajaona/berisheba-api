@@ -27,7 +27,7 @@ var Doit = /** @class */ (function () {
     ], Doit.prototype, "reservationIdReservation", void 0);
     __decorate([
         typeorm_1.Column("double precision", {
-            nullable: true,
+            nullable: false,
             name: "prixAutre"
         }),
         __metadata("design:type", Number)

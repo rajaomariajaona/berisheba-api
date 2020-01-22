@@ -1,23 +1,19 @@
 import { Controller } from '../Controller';
 import { Router, Request, Response, NextFunction } from 'express';
-import { Repository, Connection, Raw, getConnection } from 'typeorm';
+import { Repository, Connection, Raw, getConnection, UpdateResult, EntityManager, createConnection } from 'typeorm';
 import { Reservation } from '../../entities/Reservation';
 import { ormconfig } from '../../config';
-import { createConnection } from 'typeorm';
 import { Constituer } from '../../entities/Constituer';
 import moment = require('moment')
 import { DemiJournee } from '../../entities/DemiJournee';
 import { Client } from '../../entities/Client';
 import { TypeReservation } from '../../entities/TypeReservation';
+import { DeleteResult } from 'typeorm';
 
 
 export default class ReservationController extends Controller {
     reservationRepository: Repository<Reservation>
-    constituerRepository: Repository<Constituer>
-    clientRepository: Repository<Client>
-    demiJourneeRepository: Repository<DemiJournee>
-    typeReservationRepository: Repository<TypeReservation>
-
+    connection : Connection
     constructor() {
         super()
         this.createConnectionAndAssignRepository().then((_) => {
@@ -25,59 +21,121 @@ export default class ReservationController extends Controller {
         })
     }
     async createConnectionAndAssignRepository(): Promise<void> {
-        var connection: Connection = await createConnection(ormconfig)
-        this.reservationRepository = connection.getRepository(Reservation)
-        this.constituerRepository = connection.getRepository(Constituer)
-        this.clientRepository = connection.getRepository(Client)
-        this.demiJourneeRepository = connection.getRepository(DemiJournee)
-        this.typeReservationRepository = connection.getRepository(TypeReservation)
+        this.connection = await createConnection(ormconfig)
+        this.reservationRepository = this.connection.getRepository(Reservation)
     }
     async addGet(router: Router): Promise<void> {
         await this.getReservationAndDateByWeek(router)
     }
 
     private async getReservationAndDateByWeek(router: Router) {
-        router.get("/:week", async (req: Request, res: Response, next: NextFunction) => {
+        router.get("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                var reservations: Object = await this.fetchReservationsByWeekFromDatabase(await await this.parseWeekFromRequest(req))
-                await this.sendResponse(res, 200, { data: reservations })
+                
+                var reservations: Object = await this.fetchReservationsByWeekFromDatabase(await this.parseWeekFromRequest(req))
+                var reservationsById: Object = {}
+                Object.keys(reservations).map((index : string) => {
+                    return reservations[index]
+                }).forEach((reservation : Object) => {
+                    reservationsById[reservation["idReservation"]] = reservation
+                })
+                await this.sendResponse(res, 200, { data: reservationsById})
             } catch (err) {
                 await this.passErrorToExpress(err, next)
             }
         })
     }
 
-    private async parseWeekFromRequest(req: Request): Promise<string> {
-        return req.params.week
+    private async parseWeekFromRequest(req: Request): Promise<Object> {
+        var weeks: Object = {}
+        var range = new Array<Array<number>>();
+        var unique = new Array<number>();
+        if(req.headers["range"]){
+            var raw: any = req.headers["range"];
+            var splitByComma: Array<string> = raw.split(",");
+            if(splitByComma.length == 0)
+                throw new Error(`${req.headers["range"]} is not Valid range of week`);
+                
+            splitByComma.forEach(async (rangeOrUnique) => {
+                
+                if(this.isRange(rangeOrUnique)){
+                    this.addRange(rangeOrUnique, range)
+                }else if(this.isUnique(rangeOrUnique)){
+                    this.addUnique(rangeOrUnique,unique)
+                }else{
+                    throw new Error("Not Range and Not Number");  
+                }
+            })
+        }else{
+            throw new Error("No Weeks Added in body");
+        }
+        weeks["range"] = range
+        weeks["unique"] = unique
+        return weeks
     }
-
-    private async fetchReservationsByWeekFromDatabase(week: string): Promise<any> {
-        var query: string = `SELECT "Reservation"."idReservation", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", MIN(CONCAT("date", \' \' ,"TypeDemiJournee")) as "DateEntree", MAX(CONCAT("date", \' \' ,"TypeDemiJournee")) as "DateSortie" FROM "DemiJournee" JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_TypeDemiJournee" = "DemiJournee"."TypeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" HAVING DATE_PART(\'week\', MIN("date")) <= ${week} AND  DATE_PART(\'week\', MAX("date")) >= ${week}`
+    private isRange(rangeOrUnique: string): boolean{
+        return new RegExp("^\\d+-\\d+$").test(rangeOrUnique)
+    }
+    private isUnique(rangeOrUnique: string) : boolean {
+        return new RegExp("^\\d+$").test(rangeOrUnique)
+    }
+    private addRange(rangeOrUnique: string, range: Array<number[]>){
+        var splitByMinus: Array<number> = rangeOrUnique.split("-").map((number) => {
+            return Number(number)
+        })
+        if(splitByMinus[0] > splitByMinus[1])
+            throw new Error("Range error")
+        else{
+            range.push(splitByMinus)
+        }
+    }
+    private addUnique(rangeOrUnique: string, unique: Array<Number>){
+        unique.push(Number(rangeOrUnique))
+    }
+    private async fetchReservationsByWeekFromDatabase(weeks: Object): Promise<any> {
+        var havingConditions: Array<string> = new Array<string>();
+        weeks["unique"].forEach((week : number) => {
+            havingConditions.push(`(DATE_PART('week', MIN("date")) <= ${week} AND  DATE_PART('week', MAX("date")) >= ${week})`)
+        })
+        weeks["range"].forEach((week : Array<number>) => {
+            havingConditions.push(`(DATE_PART('week', MIN("date")) <= ${week[1]} AND  DATE_PART('week', MAX("date")) >= ${week[0]})`)
+        })
+        var query: string = `SELECT "Reservation"."idReservation", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."prixPersonne", "Reservation"."couleur", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", split_part(MIN(CONCAT("date", ' ' ,"TypeDemiJournee")),' ', 1) as "DateEntree",
+        split_part(MIN(CONCAT("date", ' ' ,"TypeDemiJournee")),' ', 2) as "TypeDemiJourneeEntree", split_part(MAX(CONCAT("date", ' ' ,"TypeDemiJournee")), ' ', 1) as "DateSortie", split_part(MAX(CONCAT("date", ' ' ,"TypeDemiJournee")), ' ', 2) as "TypeDemiJourneeSortie", DATE_PART('week', MIN("date")) as "SemaineEntree", DATE_PART('week', MAX("date")) as "SemaineSortie" FROM "DemiJournee"  JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_TypeDemiJournee" = "DemiJournee"."TypeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" ${havingConditions.length > 0 ? 'HAVING' : ''} ${havingConditions.join(" OR ")}`
         return await getConnection().createEntityManager().query(query)
     }
 
     async addPost(router: Router): Promise<void> {
         router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                var demiJournees: DemiJournee[] = await this.createDemiJourneesAndSaveToDatabase(await this.parseDataTimeFromRequest(req))
-                var reservation: Reservation = await this.createReservationFromRequestAndSaveToDatabase(req)
-                await this.createConstituersFromRequestAndSaveToDatabase(demiJournees, reservation, req)
-                await this.sendResponse(res, 200, { message: "Reservation has been created" })
+                this.connection.transaction(async (entityManager: EntityManager) => {
+                    var demiJournees: DemiJournee[] = await this.createDemiJournees(await this.parseDataTimeFromRequest(req))
+                    var reservation: Reservation = await this.createReservationFromRequestAndTransactionalEntityManager(req, entityManager)
+                    var constituers: Constituer[] = await this.createConstituersFromRequest(demiJournees, reservation, req)
+                    await this.saveAllInDatabase(entityManager, demiJournees, reservation, constituers)
+                })
+                .then(async (_) => {
+                    await this.sendResponse(res, 201, { message: "Reservation has been created"})
+                })
+                .catch(async (err) => {
+                    console.log(err)
+                    await this.sendResponse(res, 403, { message: "Reservation Not Created" })
+                })
             } catch (err) {
                 await this.passErrorToExpress(err, next)
             }
         })
     }
 
-    private async createDemiJourneesAndSaveToDatabase(data: any): Promise<Array<DemiJournee>> {
+    private async createDemiJournees(data: any): Promise<Array<DemiJournee>> {
         var currentDate: moment.Moment = moment(data.dateEntree);
         const typeDemiJournee = ["Jour", "Nuit"]
         var demiJournees: DemiJournee[] = new Array<DemiJournee>()
         await this.addDemiJourneeToSaveInList(demiJournees, currentDate, data, typeDemiJournee)
-        return await this.saveDemiJourneeToDatabase(demiJournees)
+        return demiJournees
     }
 
-    private async addDemiJourneeToSaveInList(demiJournees: DemiJournee[],currentDate: moment.Moment, data : any, typeDemiJournee : Array<string>){
+    private async addDemiJourneeToSaveInList(demiJournees: DemiJournee[], currentDate: moment.Moment, data: any, typeDemiJournee: Array<string>) {
         while (await this.isOnInterval(currentDate, data)) {
             if (await this.isOnSortieAndNotEntree(currentDate, data)) {
                 await this.cursorOnDateSortie(demiJournees, currentDate, typeDemiJournee, data)
@@ -95,11 +153,6 @@ export default class ReservationController extends Controller {
             }
         }
     }
-
-    private async saveDemiJourneeToDatabase(demiJourneesToSave: DemiJournee[]): Promise<Array<DemiJournee>> {
-        return await this.demiJourneeRepository.save(demiJourneesToSave)
-    }
-
     private async isOnInterval(currentDate: moment.Moment, data: any): Promise<boolean> {
         return currentDate.isBefore(moment(data.dateSortie).add(1, 'd'))
     }
@@ -178,19 +231,19 @@ export default class ReservationController extends Controller {
             throw new Error("Invalid data at in the request data")
     }
 
-    private async createReservationFromRequestAndSaveToDatabase(req: Request): Promise<Reservation> {
-        var reservation: Reservation = await this.reservationRepository.save(this.reservationRepository.create(req.body as Object))
-        reservation.clientIdClient = await this.clientRepository.findOne(req.body.idClient)
-        reservation.typeReservationTypeReservation = await this.typeReservationRepository.findOne(req.body.typeReservation)
-        return await this.reservationRepository.save(reservation)
+    private async createReservationFromRequestAndTransactionalEntityManager(req: Request, entityManager: EntityManager): Promise<Reservation> {
+        var reservation: Reservation = entityManager.create(Reservation, req.body as Object)
+        reservation.clientIdClient = await entityManager.findOneOrFail(Client, req.body.idClient)
+        reservation.typeReservationTypeReservation = await entityManager.findOneOrFail(TypeReservation, req.body.typeReservation)
+        return reservation
     }
 
-    private async createConstituersFromRequestAndSaveToDatabase(demiJournees: DemiJournee[], reservation: Reservation, req: Request): Promise<Array<Constituer>> {
+    private async createConstituersFromRequest(demiJournees: DemiJournee[], reservation: Reservation, req: Request): Promise<Array<Constituer>> {
         var constituers: Constituer[] = new Array<Constituer>()
         demiJournees.forEach(async (demiJournee: DemiJournee) => {
             await this.addConstituerToSavedList(constituers, demiJournee, reservation, req)
         })
-        return await this.constituerRepository.save(constituers)
+        return constituers
     }
     private async addConstituerToSavedList(constituers: Constituer[], demiJournee: DemiJournee, reservation: Reservation, req: Request) {
         var constituer: Constituer = new Constituer()
@@ -200,12 +253,48 @@ export default class ReservationController extends Controller {
         constituers.push(constituer)
     }
 
-
+    private async saveAllInDatabase(entityManager: EntityManager, demiJournees: DemiJournee[], reservation: Reservation, constituers: Constituer[]){
+        await entityManager.save(DemiJournee, demiJournees)
+        await entityManager.save(Reservation, reservation)
+        await entityManager.save(Constituer, constituers)
+    }
 
     async addDelete(router: Router): Promise<void> {
-
+        router.delete("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                var result: DeleteResult = await this.reservationRepository.delete(await this.parseIdReservationFromRequest(req))
+                if (await this.isDeleted(result)) {
+                    await this.sendResponse(res, 204, { message: "Reservation deleted successfully" })
+                } else {
+                    await this.sendResponse(res, 403, { message: "None Reservation has been deleted" })
+                }
+            } catch (err) {
+                await this.passErrorToExpress(err, next)
+            }
+        })
     }
-    async addPut(router: Router): Promise<void> {
-
+    private async parseIdReservationFromRequest(req: Request): Promise<string> {
+        return req.params.idReservation
+    }
+    private async isDeleted(result: DeleteResult): Promise<Boolean> {
+        return result.affected !== 0
+    }
+    async addPut(router: Router) {
+        router.put("/idReservation", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                var reservation: Reservation = await this.reservationRepository.findOneOrFail(await this.parseIdReservationFromRequest(req))
+                var reservationMerged: Reservation = await this.mergeReservationWithRequest(reservation, req)
+                await this.updateReservationInDatabase(reservationMerged);
+                await this.sendResponse(res, 200, { message: "Reservation Updated" })
+            } catch (err) {
+                await this.passErrorToExpress(err, next)
+            }
+        })
+    }
+    private async mergeReservationWithRequest(reservation: Reservation, req: Request): Promise<Reservation> {
+        return this.reservationRepository.merge(req.body, reservation)
+    }
+    private async updateReservationInDatabase(reservation: Reservation): Promise<Reservation> {
+        return await this.reservationRepository.save(reservation)
     }
 }

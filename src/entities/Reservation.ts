@@ -42,6 +42,13 @@ export class Reservation {
         name:"etatReservation"
         })
     etatReservation:boolean;
+
+
+    @Column("boolean",{ 
+        nullable:false,
+        name:"nbPersonneIdentique"
+        })
+    nbPersonneIdentique:boolean;
         
 
     @Column("varchar",{ 
@@ -59,7 +66,12 @@ export class Reservation {
         })
     nomReservation:string ;
         
-
+    @Column("char",{ 
+        nullable:true,
+        length:10,
+        name:"couleur"
+        })
+    couleur:string | null;
    
     @ManyToOne(()=>Client, (Client: Client)=>Client.reservations,{  nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Client_idClient'})

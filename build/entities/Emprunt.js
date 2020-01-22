@@ -26,15 +26,8 @@ var Emprunt = /** @class */ (function () {
         __metadata("design:type", Reservation_1.Reservation)
     ], Emprunt.prototype, "reservationIdReservation", void 0);
     __decorate([
-        typeorm_1.Column("date", {
-            nullable: true,
-            name: "dateEmprunt"
-        }),
-        __metadata("design:type", String)
-    ], Emprunt.prototype, "dateEmprunt", void 0);
-    __decorate([
         typeorm_1.Column("int", {
-            nullable: true,
+            nullable: false,
             name: "nbEmprunt"
         }),
         __metadata("design:type", Number)

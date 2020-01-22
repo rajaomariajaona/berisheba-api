@@ -10,26 +10,18 @@ export class Emprunt {
    
     @ManyToOne(()=>Ustensile, (Ustensile: Ustensile)=>Ustensile.emprunts,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Ustensile_idUstensile'})
-    ustensileIdUstensile:Ustensile | null;
+    ustensileIdUstensile:Ustensile;
 
 
    
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.emprunts,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
-    reservationIdReservation:Reservation | null;
-
-
-    @Column("date",{ 
-        nullable:true,
-        name:"dateEmprunt"
-        })
-    dateEmprunt:string | null;
-        
+    reservationIdReservation:Reservation;
 
     @Column("int",{ 
-        nullable:true,
+        nullable:false,
         name:"nbEmprunt"
         })
-    nbEmprunt:number | null;
+    nbEmprunt:number;
         
 }

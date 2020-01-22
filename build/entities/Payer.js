@@ -26,19 +26,11 @@ var Payer = /** @class */ (function () {
         __metadata("design:type", Paiement_1.Paiement)
     ], Payer.prototype, "paiementTypePaiement", void 0);
     __decorate([
-        typeorm_1.Column("date", {
-            nullable: true,
-            name: "datePaiement"
-        }),
-        __metadata("design:type", String)
-    ], Payer.prototype, "datePaiement", void 0);
-    __decorate([
-        typeorm_1.Column("varchar", {
-            nullable: true,
-            length: 45,
+        typeorm_1.Column("double precision", {
+            nullable: false,
             name: "sommePayee"
         }),
-        __metadata("design:type", String)
+        __metadata("design:type", Number)
     ], Payer.prototype, "sommePayee", void 0);
     Payer = __decorate([
         typeorm_1.Entity("Payer"),

@@ -19,27 +19,27 @@ export class Client {
         })
     nomClient:string;
     @Column("varchar",{ 
-        nullable:true,
+        nullable:false,
         length:50,
         name:"prenomClient"
         })
-    prenomClient:string | null;
+    prenomClient:string;
         
 
     @Column("varchar",{ 
-        nullable:true,
+        nullable:false,
         length:100,
         name:"adresseClient"
         })
-    adresseClient:string | null;
+    adresseClient:string;
         
 
     @Column("varchar",{ 
-        nullable:true,
+        nullable:false,
         length:13,
         name:"numTelClient"
         })
-    numTelClient:string | null;
+    numTelClient:string;
         
 
    

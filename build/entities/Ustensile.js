@@ -24,20 +24,19 @@ var Ustensile = /** @class */ (function () {
     ], Ustensile.prototype, "idUstensile", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
+            nullable: false,
             length: 100,
             name: "nomUstensile"
         }),
         __metadata("design:type", String)
     ], Ustensile.prototype, "nomUstensile", void 0);
     __decorate([
-        typeorm_1.Column("varchar", {
+        typeorm_1.Column("int", {
             nullable: true,
-            length: 45,
-            name: "nbDisponible"
+            name: "nbTotal"
         }),
-        __metadata("design:type", String)
-    ], Ustensile.prototype, "nbDisponible", void 0);
+        __metadata("design:type", Number)
+    ], Ustensile.prototype, "nbTotal", void 0);
     __decorate([
         typeorm_1.OneToMany(function () { return Rendre_1.Rendre; }, function (Rendre) { return Rendre.ustensileIdUstensile; }, { onDelete: 'CASCADE', onUpdate: 'CASCADE' }),
         __metadata("design:type", Array)

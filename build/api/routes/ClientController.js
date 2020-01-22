@@ -70,14 +70,21 @@ var ClientController = /** @class */ (function (_super) {
     }
     ClientController.prototype.createConnectionAndAssignRepository = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var connection;
+            var connection, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, typeorm_1.createConnection(config_1.ormconfig)];
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, typeorm_1.createConnection(config_1.ormconfig)];
                     case 1:
                         connection = _a.sent();
                         this.clientRepository = connection.getRepository(Client_1.Client);
-                        return [2 /*return*/];
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_1 = _a.sent();
+                        console.log(error_1);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
                 }
             });
         });
@@ -230,8 +237,7 @@ var ClientController = /** @class */ (function (_super) {
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                _a.trys.push([0, 8, , 9]);
-                                if (!!this.isDeletingMode(req)) return [3 /*break*/, 7];
+                                _a.trys.push([0, 8, , 10]);
                                 return [4 /*yield*/, this.createClientFromRequest(req)];
                             case 1:
                                 clientToSave = _a.sent();
@@ -251,12 +257,14 @@ var ClientController = /** @class */ (function (_super) {
                                 _a.label = 7;
                             case 7:
                                 next();
-                                return [3 /*break*/, 9];
+                                return [3 /*break*/, 10];
                             case 8:
                                 err_3 = _a.sent();
-                                this.passErrorToExpress(err_3, next);
-                                return [3 /*break*/, 9];
-                            case 9: return [2 /*return*/];
+                                return [4 /*yield*/, this.passErrorToExpress(err_3, next)];
+                            case 9:
+                                _a.sent();
+                                return [3 /*break*/, 10];
+                            case 10: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -268,13 +276,6 @@ var ClientController = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, client !== undefined];
-            });
-        });
-    };
-    ClientController.prototype.isDeletingMode = function (req) {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                return [2 /*return*/, req.body.deleteList];
             });
         });
     };
@@ -299,26 +300,22 @@ var ClientController = /** @class */ (function (_super) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                router.delete("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
                     var err_4;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
-                                _a.trys.push([0, 3, , 4]);
-                                if (!this.isDeletingMode(req)) return [3 /*break*/, 2];
+                                _a.trys.push([0, 2, , 3]);
                                 return [4 /*yield*/, this.removeClientInDatabase(req)];
                             case 1:
                                 _a.sent();
-                                res.status(201).json({ message: "deleted successfully" });
-                                _a.label = 2;
+                                res.status(204).json({ message: "deleted successfully" });
+                                return [3 /*break*/, 3];
                             case 2:
-                                next();
-                                return [3 /*break*/, 4];
-                            case 3:
                                 err_4 = _a.sent();
                                 this.passErrorToExpress(err_4, next);
-                                return [3 /*break*/, 4];
-                            case 4: return [2 /*return*/];
+                                return [3 /*break*/, 3];
+                            case 3: return [2 /*return*/];
                         }
                     });
                 }); });
@@ -342,8 +339,10 @@ var ClientController = /** @class */ (function (_super) {
     };
     ClientController.prototype.parseRemoveListFromRequest = function (req) {
         return __awaiter(this, void 0, void 0, function () {
+            var rawDeleteList;
             return __generator(this, function (_a) {
-                return [2 /*return*/, JSON.parse(req.body.deleteList)];
+                rawDeleteList = req.headers["deletelist"];
+                return [2 /*return*/, JSON.parse(rawDeleteList)];
             });
         });
     };

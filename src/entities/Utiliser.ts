@@ -10,34 +10,34 @@ export class Utiliser {
    
     @ManyToOne(()=>Appareil, (Appareil: Appareil)=>Appareil.utilisers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Appareil_typeAppareil'})
-    appareilTypeAppareil:Appareil | null;
+    appareilTypeAppareil:Appareil;
 
 
    
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.utilisers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
-    reservationIdReservation:Reservation | null;
+    reservationIdReservation:Reservation;
 
 
     @Column("varchar",{ 
-        nullable:true,
+        nullable:false,
         length:100,
         name:"nomAppareil"
         })
-    nomAppareil:string | null;
+    nomAppareil:string;
         
 
     @Column("double precision",{ 
-        nullable:true,
+        nullable:false,
         name:"puissance"
         })
-    puissance:number | null;
+    puissance:number;
         
 
     @Column("int",{ 
-        nullable:true,
+        nullable:false,
         name:"duree"
         })
-    duree:number | null;
+    duree:number;
         
 }
