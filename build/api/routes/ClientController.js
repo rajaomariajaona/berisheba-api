@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -34,77 +47,374 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _this = this;
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = require("express");
 var typeorm_1 = require("typeorm");
 var Client_1 = require("../../entities/Client");
 var config_1 = require("../../config");
-var clientRoute = express_1.Router();
-typeorm_1.createConnection(config_1.ormconfig).then(function (connection) {
-    var clientRepository = connection.getRepository(Client_1.Client);
-    clientRoute.get("/", function (req, res, next) {
-        clientRepository.find().then(function (clients) {
-            res.status(200).json({ data: clients });
-            next();
-        });
-    });
-    clientRoute.get("/:id", function (req, res, next) {
-        clientRepository.findOne(req.params.id).then(function (client) {
-            if (client)
-                res.status(200).json({ data: client });
-            else
-                res.status(404).json({ message: "Not found" });
-            next();
-        });
-    });
-    clientRoute.delete("/:id", function (req, res, next) {
-        clientRepository.delete(req.params.id).then(function (result) {
-            if (result.affected)
-                res.status(204).json({ message: "deleted successfully" });
-            else
-                res.status(404).json({ message: "Not found" });
-            next();
-        });
-    });
-    clientRoute.post("/", function (req, res, next) {
-        if (req.body.deleteList) {
-            clientRepository.delete(JSON.parse(req.body.deleteList)).then(function () {
-                res.status(201).json({ message: "deleted successfully" });
-            }).catch(function (error) {
-                return res.status(400).json({ message: "Not found", error: error });
+var Controller_1 = require("../Controller");
+var ClientController = /** @class */ (function (_super) {
+    __extends(ClientController, _super);
+    function ClientController() {
+        var _this = _super.call(this) || this;
+        _this.createConnectionAndAssignRepository().then(function (_) { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.addAllRoutes(this.mainRouter)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
             });
-        }
-        else {
-            var c = clientRepository.create(req.body);
-            clientRepository.save(c).then(function (client) {
-                if (client)
-                    res.status(201).json({ message: "added successfully" });
-                else
-                    res.status(400).json({ message: "Not found" });
+        }); });
+        return _this;
+    }
+    ClientController.prototype.createConnectionAndAssignRepository = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var connection, error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, typeorm_1.createConnection(config_1.ormconfig)];
+                    case 1:
+                        connection = _a.sent();
+                        this.clientRepository = connection.getRepository(Client_1.Client);
+                        return [3 /*break*/, 3];
+                    case 2:
+                        error_1 = _a.sent();
+                        console.log(error_1);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
             });
-        }
-    });
-    clientRoute.put("/:id", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
-        var c;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, clientRepository.findOne(req.params.id)];
-                case 1:
-                    c = _a.sent();
-                    clientRepository.merge(c, req.body);
-                    clientRepository.save(c).then(function (client) {
-                        if (client)
-                            res.status(201).json({ message: "modified successfully" });
-                        else
-                            res.status(400).json({ message: "Not found" });
+        });
+    };
+    ClientController.prototype.addGet = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getAllClient(router)];
+                    case 1:
+                        _a.sent();
+                        return [4 /*yield*/, this.getSingleClient(router)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ClientController.prototype.getAllClient = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.get("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var clients, structuredClientData, err_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 4, , 6]);
+                                return [4 /*yield*/, this.fetchClientsFromDatabase()];
+                            case 1:
+                                clients = _a.sent();
+                                return [4 /*yield*/, this.useIdClientAsKey(clients)];
+                            case 2:
+                                structuredClientData = _a.sent();
+                                return [4 /*yield*/, this.sendResponse(res, 200, { data: structuredClientData })];
+                            case 3:
+                                _a.sent();
+                                next();
+                                return [3 /*break*/, 6];
+                            case 4:
+                                err_1 = _a.sent();
+                                return [4 /*yield*/, this.passErrorToExpress(err_1, next)];
+                            case 5:
+                                _a.sent();
+                                return [3 /*break*/, 6];
+                            case 6: return [2 /*return*/];
+                        }
                     });
-                    return [2 /*return*/];
-            }
+                }); });
+                return [2 /*return*/];
+            });
         });
-    }); });
-}).catch(function (error) {
-    console.log(error);
-});
-exports.default = clientRoute;
+    };
+    ClientController.prototype.fetchClientsFromDatabase = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.clientRepository.find()];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    ClientController.prototype.useIdClientAsKey = function (clients) {
+        return __awaiter(this, void 0, void 0, function () {
+            var obj;
+            return __generator(this, function (_a) {
+                obj = {};
+                clients.forEach(function (client) {
+                    obj[client["idClient"]] = client;
+                });
+                return [2 /*return*/, obj];
+            });
+        });
+    };
+    ClientController.prototype.getSingleClient = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.get("/:id", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var client, err_2;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 7, , 9]);
+                                return [4 /*yield*/, this.fetchClientFromDatabase(req.params.id)];
+                            case 1:
+                                client = _a.sent();
+                                return [4 /*yield*/, this.isClientExist(client)];
+                            case 2:
+                                if (!_a.sent()) return [3 /*break*/, 4];
+                                return [4 /*yield*/, this.sendResponse(res, 200, { data: client })];
+                            case 3:
+                                _a.sent();
+                                return [3 /*break*/, 6];
+                            case 4: return [4 /*yield*/, this.sendResponse(res, 404, { message: "Client Not Found" })];
+                            case 5:
+                                _a.sent();
+                                _a.label = 6;
+                            case 6:
+                                next();
+                                return [3 /*break*/, 9];
+                            case 7:
+                                err_2 = _a.sent();
+                                return [4 /*yield*/, this.passErrorToExpress(err_2, next)];
+                            case 8:
+                                _a.sent();
+                                return [3 /*break*/, 9];
+                            case 9: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
+    };
+    ClientController.prototype.fetchClientFromDatabase = function (id) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.clientRepository.findOne(id)];
+            });
+        });
+    };
+    ClientController.prototype.isClientExist = function (client) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, client !== undefined];
+            });
+        });
+    };
+    ClientController.prototype.addPost = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.postClient(router)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    ClientController.prototype.postClient = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.post("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var clientToSave, clientSaved, err_3;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 8, , 10]);
+                                return [4 /*yield*/, this.createClientFromRequest(req)];
+                            case 1:
+                                clientToSave = _a.sent();
+                                return [4 /*yield*/, this.saveClientToDatabase(clientToSave)];
+                            case 2:
+                                clientSaved = _a.sent();
+                                return [4 /*yield*/, this.isClientSaved(clientSaved)];
+                            case 3:
+                                if (!_a.sent()) return [3 /*break*/, 5];
+                                return [4 /*yield*/, this.sendResponse(res, 201, { message: "Client Added Successfully" })];
+                            case 4:
+                                _a.sent();
+                                return [3 /*break*/, 7];
+                            case 5: return [4 /*yield*/, this.sendResponse(res, 403, { message: "Client Not Added" })];
+                            case 6:
+                                _a.sent();
+                                _a.label = 7;
+                            case 7:
+                                next();
+                                return [3 /*break*/, 10];
+                            case 8:
+                                err_3 = _a.sent();
+                                return [4 /*yield*/, this.passErrorToExpress(err_3, next)];
+                            case 9:
+                                _a.sent();
+                                return [3 /*break*/, 10];
+                            case 10: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
+    };
+    ClientController.prototype.isClientSaved = function (client) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, client !== undefined];
+            });
+        });
+    };
+    ClientController.prototype.createClientFromRequest = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.clientRepository.create(req.body)];
+            });
+        });
+    };
+    ClientController.prototype.saveClientToDatabase = function (client) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.clientRepository.save(client)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    ClientController.prototype.addDelete = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.delete("/", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var err_4;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 2, , 3]);
+                                return [4 /*yield*/, this.removeClientInDatabase(req)];
+                            case 1:
+                                _a.sent();
+                                res.status(204).json({ message: "deleted successfully" });
+                                return [3 /*break*/, 3];
+                            case 2:
+                                err_4 = _a.sent();
+                                this.passErrorToExpress(err_4, next);
+                                return [3 /*break*/, 3];
+                            case 3: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
+    };
+    ClientController.prototype.removeClientInDatabase = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = this.clientRepository).delete;
+                        return [4 /*yield*/, this.parseRemoveListFromRequest(req)];
+                    case 1: return [4 /*yield*/, _b.apply(_a, [_c.sent()])];
+                    case 2: return [2 /*return*/, _c.sent()];
+                }
+            });
+        });
+    };
+    ClientController.prototype.parseRemoveListFromRequest = function (req) {
+        return __awaiter(this, void 0, void 0, function () {
+            var rawDeleteList;
+            return __generator(this, function (_a) {
+                rawDeleteList = req.headers["deletelist"];
+                return [2 /*return*/, JSON.parse(rawDeleteList)];
+            });
+        });
+    };
+    ClientController.prototype.addPut = function (router) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                router.put("/:id", function (req, res, next) { return __awaiter(_this, void 0, void 0, function () {
+                    var clientToModify, clientModifiedReadyToSave, clientModified, err_5;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 12, , 13]);
+                                return [4 /*yield*/, this.fetchClientFromDatabase(req.params.id)];
+                            case 1:
+                                clientToModify = _a.sent();
+                                if (!this.isClientExist(clientToModify)) return [3 /*break*/, 9];
+                                return [4 /*yield*/, this.mergeClientFromRequest(clientToModify, req)];
+                            case 2:
+                                clientModifiedReadyToSave = _a.sent();
+                                return [4 /*yield*/, this.updateClientInDatabase(clientModifiedReadyToSave)];
+                            case 3:
+                                clientModified = _a.sent();
+                                return [4 /*yield*/, this.isClientExist(clientModified)];
+                            case 4:
+                                if (!_a.sent()) return [3 /*break*/, 6];
+                                return [4 /*yield*/, this.sendResponse(res, 204, { message: "Client Modified Successfully" })];
+                            case 5:
+                                _a.sent();
+                                return [3 /*break*/, 8];
+                            case 6: return [4 /*yield*/, this.sendResponse(res, 403, { message: "Client Not Modified" })];
+                            case 7:
+                                _a.sent();
+                                _a.label = 8;
+                            case 8: return [3 /*break*/, 11];
+                            case 9: return [4 /*yield*/, this.sendResponse(res, 404, { message: "Client Not Found" })];
+                            case 10:
+                                _a.sent();
+                                _a.label = 11;
+                            case 11:
+                                next();
+                                return [3 /*break*/, 13];
+                            case 12:
+                                err_5 = _a.sent();
+                                this.passErrorToExpress(err_5, next);
+                                return [3 /*break*/, 13];
+                            case 13: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
+    };
+    ClientController.prototype.mergeClientFromRequest = function (clientToModify, req) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.clientRepository.merge(clientToModify, req.body)];
+            });
+        });
+    };
+    ClientController.prototype.updateClientInDatabase = function (clientToUpdate) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.clientRepository.save(clientToUpdate)];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    return ClientController;
+}(Controller_1.Controller));
+exports.default = ClientController;
 //# sourceMappingURL=ClientController.js.map

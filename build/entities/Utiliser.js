@@ -27,7 +27,7 @@ var Utiliser = /** @class */ (function () {
     ], Utiliser.prototype, "reservationIdReservation", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
+            nullable: false,
             length: 100,
             name: "nomAppareil"
         }),
@@ -35,14 +35,14 @@ var Utiliser = /** @class */ (function () {
     ], Utiliser.prototype, "nomAppareil", void 0);
     __decorate([
         typeorm_1.Column("double precision", {
-            nullable: true,
+            nullable: false,
             name: "puissance"
         }),
         __metadata("design:type", Number)
     ], Utiliser.prototype, "puissance", void 0);
     __decorate([
         typeorm_1.Column("int", {
-            nullable: true,
+            nullable: false,
             name: "duree"
         }),
         __metadata("design:type", Number)

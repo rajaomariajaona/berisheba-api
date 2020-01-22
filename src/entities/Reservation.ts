@@ -8,7 +8,7 @@ import {Emprunt} from "./Emprunt";
 import {Utiliser} from "./Utiliser";
 import {Constituer} from "./Constituer";
 import {Salle} from "./Salle";
-import {Materiels} from "./Materiels";
+import {Materiel} from "./Materiel";
 
 
 @Entity("Reservation" )
@@ -24,10 +24,10 @@ export class Reservation {
         
 
     @Column("double precision",{ 
-        nullable:true,
+        nullable:false,
         name:"prixPersonne"
         })
-    prixPersonne:number | null;
+    prixPersonne:number ;
         
 
     @Column("double precision",{ 
@@ -41,7 +41,14 @@ export class Reservation {
         nullable:false,
         name:"etatReservation"
         })
-    etatReservation:number | null;
+    etatReservation:boolean;
+
+
+    @Column("boolean",{ 
+        nullable:false,
+        name:"nbPersonneIdentique"
+        })
+    nbPersonneIdentique:boolean;
         
 
     @Column("varchar",{ 
@@ -53,13 +60,18 @@ export class Reservation {
         
 
     @Column("varchar",{ 
-        nullable:true,
+        nullable:false,
         length:100,
         name:"nomReservation"
         })
-    nomReservation:string | null;
+    nomReservation:string ;
         
-
+    @Column("char",{ 
+        nullable:true,
+        length:10,
+        name:"couleur"
+        })
+    couleur:string | null;
    
     @ManyToOne(()=>Client, (Client: Client)=>Client.reservations,{  nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Client_idClient'})
@@ -109,8 +121,8 @@ export class Reservation {
     
 
    
-    @ManyToMany(()=>Materiels, (Materiels: Materiels)=>Materiels.reservations,{  nullable:false, })
+    @ManyToMany(()=>Materiel, (Materiel: Materiel)=>Materiel.reservations,{  nullable:false, })
     @JoinTable({ name:'Louer'})
-    materielss:Materiels[];
+    materiels:Materiel[];
     
 }

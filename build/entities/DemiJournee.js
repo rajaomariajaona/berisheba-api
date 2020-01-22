@@ -19,31 +19,26 @@ var DemiJournee = /** @class */ (function () {
             primary: true,
             nullable: false,
             name: "date",
-            unique: true
         }),
-        __metadata("design:type", Function)
+        __metadata("design:type", String)
     ], DemiJournee.prototype, "date", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
             primary: true,
             nullable: false,
             length: 20,
-            unique: true,
             name: "TypeDemiJournee"
         }),
         __metadata("design:type", String)
     ], DemiJournee.prototype, "TypeDemiJournee", void 0);
     __decorate([
-        typeorm_1.OneToMany(function () { return Constituer_1.Constituer; }, function (Constituer) { return Constituer.demiJourneeDate; }, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
+        typeorm_1.OneToMany(function () { return Constituer_1.Constituer; }, function (Constituer) {
+            return Constituer;
+        }, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
         __metadata("design:type", Array)
     ], DemiJournee.prototype, "constituers", void 0);
-    __decorate([
-        typeorm_1.OneToMany(function () { return Constituer_1.Constituer; }, function (Constituer) { return Constituer.demiJourneeTypeDemiJournee; }, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
-        __metadata("design:type", Array)
-    ], DemiJournee.prototype, "constituers2", void 0);
     DemiJournee = __decorate([
-        typeorm_1.Entity("DemiJournee"),
-        typeorm_1.Index("lol", ["TypeDemiJournee", "date",], { unique: true })
+        typeorm_1.Entity("DemiJournee")
     ], DemiJournee);
     return DemiJournee;
 }());

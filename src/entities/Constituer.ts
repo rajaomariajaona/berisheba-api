@@ -4,31 +4,25 @@ import {DemiJournee} from "./DemiJournee";
 
 
 @Entity("Constituer" )
-@Index("fk_Constituer_DemiJournee1",["demiJourneeDate","demiJourneeTypeDemiJournee",])
+//@Index("fk_Constituer_DemiJournee1",["demiJourneeDate","demiJourneeTypeDemiJournee",])
 export class Constituer {
 
    
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.constituers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
-    reservationIdReservation:Reservation | null;
+    reservationIdReservation:Reservation;
 
 
     @Column("int",{ 
-        nullable:true,
+        nullable:false,
         name:"nbPersonne"
         })
-    nbPersonne:number | null;
+    nbPersonne:number;
         
 
    
-    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee.constituers,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION' })
-    @JoinColumn({ name:'DemiJournee_date', referencedColumnName: "date"})
-    demiJourneeDate:DateConstructor;
-
-
-   
-    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee.constituers2,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION' })
-    @JoinColumn({ name:'DemiJournee_TypeDemiJournee', referencedColumnName: "TypeDemiJournee"})
-    demiJourneeTypeDemiJournee:string;
+    @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' ,eager : true})
+    @JoinColumn([{ name:'DemiJournee_date', referencedColumnName: "date"}, { name:'DemiJournee_TypeDemiJournee', referencedColumnName: "TypeDemiJournee"}])
+    demiJournee:DemiJournee;
 
 }

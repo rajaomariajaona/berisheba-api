@@ -19,7 +19,7 @@ var Emprunt_1 = require("./Emprunt");
 var Utiliser_1 = require("./Utiliser");
 var Constituer_1 = require("./Constituer");
 var Salle_1 = require("./Salle");
-var Materiels_1 = require("./Materiels");
+var Materiel_1 = require("./Materiel");
 var Reservation = /** @class */ (function () {
     function Reservation() {
     }
@@ -32,7 +32,7 @@ var Reservation = /** @class */ (function () {
     ], Reservation.prototype, "idReservation", void 0);
     __decorate([
         typeorm_1.Column("double precision", {
-            nullable: true,
+            nullable: false,
             name: "prixPersonne"
         }),
         __metadata("design:type", Number)
@@ -49,8 +49,15 @@ var Reservation = /** @class */ (function () {
             nullable: false,
             name: "etatReservation"
         }),
-        __metadata("design:type", Number)
+        __metadata("design:type", Boolean)
     ], Reservation.prototype, "etatReservation", void 0);
+    __decorate([
+        typeorm_1.Column("boolean", {
+            nullable: false,
+            name: "nbPersonneIdentique"
+        }),
+        __metadata("design:type", Boolean)
+    ], Reservation.prototype, "nbPersonneIdentique", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
             nullable: true,
@@ -61,12 +68,20 @@ var Reservation = /** @class */ (function () {
     ], Reservation.prototype, "descReservation", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
+            nullable: false,
             length: 100,
             name: "nomReservation"
         }),
         __metadata("design:type", String)
     ], Reservation.prototype, "nomReservation", void 0);
+    __decorate([
+        typeorm_1.Column("char", {
+            nullable: true,
+            length: 10,
+            name: "couleur"
+        }),
+        __metadata("design:type", String)
+    ], Reservation.prototype, "couleur", void 0);
     __decorate([
         typeorm_1.ManyToOne(function () { return Client_1.Client; }, function (Client) { return Client.reservations; }, { nullable: false, onDelete: 'CASCADE', onUpdate: 'CASCADE' }),
         typeorm_1.JoinColumn({ name: 'Client_idClient' }),
@@ -107,10 +122,10 @@ var Reservation = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Reservation.prototype, "salles", void 0);
     __decorate([
-        typeorm_1.ManyToMany(function () { return Materiels_1.Materiels; }, function (Materiels) { return Materiels.reservations; }, { nullable: false, }),
+        typeorm_1.ManyToMany(function () { return Materiel_1.Materiel; }, function (Materiel) { return Materiel.reservations; }, { nullable: false, }),
         typeorm_1.JoinTable({ name: 'Louer' }),
         __metadata("design:type", Array)
-    ], Reservation.prototype, "materielss", void 0);
+    ], Reservation.prototype, "materiels", void 0);
     Reservation = __decorate([
         typeorm_1.Entity("Reservation"),
         typeorm_1.Index("fk_Reservation_Client", ["clientIdClient",]),

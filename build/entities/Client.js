@@ -31,7 +31,7 @@ var Client = /** @class */ (function () {
     ], Client.prototype, "nomClient", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
+            nullable: false,
             length: 50,
             name: "prenomClient"
         }),
@@ -39,7 +39,7 @@ var Client = /** @class */ (function () {
     ], Client.prototype, "prenomClient", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
+            nullable: false,
             length: 100,
             name: "adresseClient"
         }),
@@ -47,7 +47,7 @@ var Client = /** @class */ (function () {
     ], Client.prototype, "adresseClient", void 0);
     __decorate([
         typeorm_1.Column("varchar", {
-            nullable: true,
+            nullable: false,
             length: 13,
             name: "numTelClient"
         }),

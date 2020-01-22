@@ -26,15 +26,8 @@ var Rendre = /** @class */ (function () {
         __metadata("design:type", Reservation_1.Reservation)
     ], Rendre.prototype, "reservationIdReservation", void 0);
     __decorate([
-        typeorm_1.Column("date", {
-            nullable: true,
-            name: "dateRendue"
-        }),
-        __metadata("design:type", String)
-    ], Rendre.prototype, "dateRendue", void 0);
-    __decorate([
         typeorm_1.Column("int", {
-            nullable: true,
+            nullable: false,
             name: "nbRendue"
         }),
         __metadata("design:type", Number)
