@@ -7,7 +7,6 @@ import { Constituer } from '../../entities/Constituer';
 import moment = require('moment')
 import { DemiJournee } from '../../entities/DemiJournee';
 import { Client } from '../../entities/Client';
-import { TypeReservation } from '../../entities/TypeReservation';
 import { DeleteResult } from 'typeorm';
 
 
@@ -234,7 +233,6 @@ export default class ReservationController extends Controller {
     private async createReservationFromRequestAndTransactionalEntityManager(req: Request, entityManager: EntityManager): Promise<Reservation> {
         var reservation: Reservation = entityManager.create(Reservation, req.body as Object)
         reservation.clientIdClient = await entityManager.findOneOrFail(Client, req.body.idClient)
-        reservation.typeReservationTypeReservation = await entityManager.findOneOrFail(TypeReservation, req.body.typeReservation)
         return reservation
     }
 

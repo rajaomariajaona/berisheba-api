@@ -1,6 +1,5 @@
 import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
 import {Client} from "./Client";
-import {TypeReservation} from "./TypeReservation";
 import {Payer} from "./Payer";
 import {Doit} from "./Doit";
 import {Rendre} from "./Rendre";
@@ -13,7 +12,6 @@ import {Materiel} from "./Materiel";
 
 @Entity("Reservation" )
 @Index("fk_Reservation_Client",["clientIdClient",])
-@Index("fk_Reservation_TypeReservation1",["typeReservationTypeReservation",])
 export class Reservation {
 
     @PrimaryGeneratedColumn({
@@ -75,14 +73,7 @@ export class Reservation {
    
     @ManyToOne(()=>Client, (Client: Client)=>Client.reservations,{  nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Client_idClient'})
-    clientIdClient:Client | null;
-
-
-   
-    @ManyToOne(()=>TypeReservation, (TypeReservation: TypeReservation)=>TypeReservation.reservations,{  nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
-    @JoinColumn({ name:'TypeReservation_typeReservation'})
-    typeReservationTypeReservation:TypeReservation | null;
-
+    clientIdClient:Client;
 
    
     @OneToMany(()=>Payer, (Payer: Payer)=>Payer.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
