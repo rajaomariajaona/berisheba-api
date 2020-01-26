@@ -3,8 +3,10 @@ import { Request } from 'express';
 import { Response } from 'express';
 import { NextFunction } from 'express';
 import router from './routerApi';
+import { Connection } from 'typeorm';
 export abstract class Controller{
     mainRouter: Router = Router()
+    connection : Connection
     abstract async createConnectionAndAssignRepository() : Promise<any>;
     protected async addAllRoutes(router : Router):Promise<void>{
         await this.addGet(router)

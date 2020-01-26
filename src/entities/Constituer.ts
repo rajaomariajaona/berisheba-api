@@ -4,7 +4,6 @@ import {DemiJournee} from "./DemiJournee";
 
 
 @Entity("Constituer" )
-//@Index("fk_Constituer_DemiJournee1",["demiJourneeDate","demiJourneeTypeDemiJournee",])
 export class Constituer {
 
    
