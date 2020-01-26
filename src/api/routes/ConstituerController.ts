@@ -1,5 +1,5 @@
 import { Controller } from "../Controller";
-import { Repository, Connection, createConnection, getConnection } from "typeorm";
+import { Repository, Connection, createConnection, getConnection, Raw } from "typeorm";
 import { Constituer } from "../../entities/Constituer";
 import { ormconfig } from '../../config';
 import { Router, Request, Response, NextFunction } from "express"
@@ -29,7 +29,8 @@ export default class ConstituerController extends Controller {
         router.get("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
             try {
                 var constituers: Constituer[] = await this.fetchConstituersFromDatabase(this.checkAndReturnIdReservation(req))
-                await this.sendResponse(res, 200, { data: constituers })
+                var stat = await getConnection().createEntityManager().query(`SELECT ROUND(AVG("Constituer"."nbPersonne"), 1) as "nbMoyennePersonne", ROUND(COUNT("DemiJournee_date") / 2.0, 1) as "nbJours" FROM "Constituer" WHERE "Reservation_idReservation" = ${this.checkAndReturnIdReservation(req)};`)
+                await this.sendResponse(res, 200, { data: constituers, stat: (stat as Array<Object>)[0]})
                 next()
             } catch (err) {
                 await this.passErrorToExpress(err, next)
@@ -40,7 +41,16 @@ export default class ConstituerController extends Controller {
         return isNaN(Number(req.params.idReservation)) ? 0 : Number(req.params.idReservation)
     }
     async fetchConstituersFromDatabase(idReservation: number): Promise<Constituer[]> {
-        return this.constituerRepository.find({ where: [{ reservationIdReservation: idReservation }] })
+        return this.constituerRepository
+        .createQueryBuilder("constituer")
+        .innerJoin("constituer.reservationIdReservation","reservation", "reservation.idReservation = :idReservation", {
+            idReservation : idReservation
+        })
+        .innerJoinAndSelect("constituer.demiJournee", "demiJournee")
+        .orderBy("demiJournee.date", "ASC")
+        .addOrderBy("demiJournee.TypeDemiJournee", "ASC")
+        .getMany()
+        // .find({ where: [{ reservationIdReservation: idReservation }]})
     }
     async addPost(router: Router): Promise<void> {
     }
