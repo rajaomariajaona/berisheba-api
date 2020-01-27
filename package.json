@@ -4,10 +4,8 @@
    "description": "",
    "main": "build/index.js",
    "scripts": {
-      "watch-typescript": "npx tsc -w",
-      "watch-javascript": "npx nodemon build/index.js",
-      "start": "npx concurrently --kill-others npm:watch-*",
-      "start-test": "node build/index.js"
+      "start": "ts-node ./src/index.ts",
+      "dev": "ts-node-dev --clear ./src/index.ts",
    },
    "author": "",
    "license": "ISC",

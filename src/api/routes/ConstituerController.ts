@@ -50,7 +50,6 @@ export default class ConstituerController extends Controller {
         .orderBy("demiJournee.date", "ASC")
         .addOrderBy("demiJournee.TypeDemiJournee", "ASC")
         .getMany()
-        // .find({ where: [{ reservationIdReservation: idReservation }]})
     }
     async addPost(router: Router): Promise<void> {
     }

@@ -9,5 +9,6 @@ app.use(bodyParser.urlencoded({extended : true}))
 app.use(bodyParser.json())
 app.use("/api", compression())
 app.use("/api", router)
-return app.listen(process.env.PORT || 3000);
+console.log("Server started")
+return app.listen(process.env.PORT || 3000)
 }
