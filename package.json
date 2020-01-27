@@ -36,6 +36,7 @@
       "concurrently": "^5.0.2",
       "nodemon": "^2.0.2",
       "ts-node": "3.3.0",
+      "ts-node-dev": "^1.0.0-pre.44",
       "typescript": "3.3.3333"
    }
 }
