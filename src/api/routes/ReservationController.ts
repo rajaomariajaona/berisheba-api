@@ -99,14 +99,15 @@ export default class ReservationController extends Controller {
         weeks["range"].forEach((week : Array<number>) => {
             havingConditions.push(`(DATE_PART('week', MIN("date")) <= ${week[1]} AND  DATE_PART('week', MAX("date")) >= ${week[0]})`)
         })
-        var query: string = `SELECT "Reservation"."idReservation", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."prixPersonne", "Reservation"."couleur", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 1) as "DateEntree",
-        split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 2) as "typeDemiJourneeEntree", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 1) as "DateSortie", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 2) as "typeDemiJourneeSortie", DATE_PART('week', MIN("date")) as "SemaineEntree", DATE_PART('week', MAX("date")) as "SemaineSortie" FROM "DemiJournee"  JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_typeDemiJournee" = "DemiJournee"."typeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" ${havingConditions.length > 0 ? 'HAVING' : ''} ${havingConditions.join(" OR ")}`
+        var query: string = `SELECT "Reservation"."idReservation", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."prixPersonne", "Reservation"."couleur", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 1) as "dateEntree",
+        split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 2) as "typeDemiJourneeEntree", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 1) as "dateSortie", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 2) as "typeDemiJourneeSortie", DATE_PART('week', MIN("date")) as "semaineEntree", DATE_PART('week', MAX("date")) as "semaineSortie" FROM "DemiJournee"  JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_typeDemiJournee" = "DemiJournee"."typeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" ${havingConditions.length > 0 ? 'HAVING' : ''} ${havingConditions.join(" OR ")}`
         return await getConnection().createEntityManager().query(query)
     }
 
     async addPost(router: Router): Promise<void> {
         router.post("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
+                console.log(req.body)
                 this.connection.transaction(async (entityManager: EntityManager) => {
                     var demiJournees: DemiJournee[] = await this.createDemiJournees(await this.parseDataTimeFromRequest(req))
                     var reservation: Reservation = await this.createReservationFromRequestAndTransactionalEntityManager(req, entityManager)

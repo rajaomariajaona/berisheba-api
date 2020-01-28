@@ -1,5 +1,5 @@
 import { Controller } from "../Controller";
-import { Repository, Connection, createConnection, getConnection, Raw } from "typeorm";
+import { Repository, Connection, createConnection, getConnection, Raw, EntityManager } from "typeorm";
 import { Constituer } from "../../entities/Constituer";
 import { ormconfig } from '../../config';
 import { Router, Request, Response, NextFunction } from "express"
@@ -28,11 +28,16 @@ export default class ConstituerController extends Controller {
     private async getAllConstituer(router: Router): Promise<void> {
         router.get("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
             try {
+                try {
+                    var reservation = await this.connection.getRepository(Reservation).findOneOrFail(this.checkAndReturnIdReservation(req))
+                } catch (error) {
+                    this.sendResponse(res, 404, { error: "This Reservation not found" })
+                    next()
+                    return
+                }
                 var constituers: Constituer[] = await this.fetchConstituersFromDatabase(this.checkAndReturnIdReservation(req))
                 var stat = await getConnection().createEntityManager().query(`SELECT ROUND(AVG("Constituer"."nbPersonne"), 1) as "nbMoyennePersonne", ROUND(COUNT("DemiJournee_date") / 2.0, 1) as "nbJours" FROM "Constituer" WHERE "Reservation_idReservation" = ${this.checkAndReturnIdReservation(req)};`)
                 await this.sendResponse(res, 200, { data: constituers, stat: (stat as Array<Object>)[0]})
-                // {data : Array.from(new Map([[{bla : 'bla', bli : 'bli'}, 30]])) }
-                // { data: constituers, stat: (stat as Array<Object>)[0]}
                 next()
             } catch (err) {
                 await this.passErrorToExpress(err, next)
@@ -64,13 +69,12 @@ export default class ConstituerController extends Controller {
                 var reservation: Reservation;
                 try {
                     reservation = await this.connection.getRepository(Reservation).findOneOrFail(this.checkAndReturnIdReservation(req))
-                    this.deleteConstituers(this.checkAndReturnIdReservation(req))
                 } catch (error) {
-                    this.sendResponse(res, 200, { data: "This Reservation not found" })
+                    this.sendResponse(res, 404, { data: "This Reservation not found" })
                     next()
                     return
                 }
-                var data: Object = JSON.parse(req.headers["data"].toString())
+                var data: Object = JSON.parse(req.body.data)
                 var constituersToSave: Constituer[] = new Array<Constituer>();
                 var demiJourneesToSave: Array<DemiJournee> = new Array<DemiJournee>();
 
@@ -87,11 +91,16 @@ export default class ConstituerController extends Controller {
                     constituer.reservationIdReservation = reservation
                     constituersToSave.push(constituer)
                 })
-                await this.connection.getRepository(DemiJournee).save(demiJourneesToSave).then(_ => {
-                    this.constituerRepository.save(constituersToSave)
+                this.connection.transaction(async (entityManager : EntityManager) => {
+                    entityManager.query(`DELETE FROM "Constituer" WHERE "Reservation_idReservation" = ${reservation.idReservation}`)
+                    entityManager.save(DemiJournee, demiJourneesToSave)
+                    entityManager.save(Constituer, constituersToSave)
+                }).then(_ => {
+                    this.sendResponse(res, 200, { data: "Update successfully" })
+                    next()
+                }).catch(err => {
+                    throw err;
                 })
-                this.sendResponse(res, 200, { data: "Update successfully" })
-                next()
             } catch (err) {
                 this.passErrorToExpress(err, next)
             }
