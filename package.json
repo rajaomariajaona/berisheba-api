@@ -5,7 +5,7 @@
    "main": "build/index.js",
    "scripts": {
       "start": "ts-node ./src/index.ts",
-      "dev": "ts-node-dev --clear ./src/index.ts",
+      "dev": "ts-node-dev --clear ./src/index.ts"
    },
    "author": "",
    "license": "ISC",

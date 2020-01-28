@@ -17,9 +17,9 @@ export class DemiJournee {
         primary: true,
         nullable:false,
         length:20,
-        name:"TypeDemiJournee"
+        name:"typeDemiJournee"
         })
-    TypeDemiJournee:string;
+    typeDemiJournee:string;
         
 
    
