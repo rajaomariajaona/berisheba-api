@@ -24,9 +24,29 @@ export default class ReservationController extends Controller {
         this.reservationRepository = this.connection.getRepository(Reservation)
     }
     async addGet(router: Router): Promise<void> {
+        await this.getReservationAndDateById(router)
         await this.getReservationAndDateByWeek(router)
     }
 
+    private async getReservationAndDateById(router: Router) {
+        router.get("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                
+                var reservations: Object = await this.fetchReservationsByIdFromDatabase(await this.parseIdFromRequest(req))
+                await this.sendResponse(res, 200, { data: reservations[0]})
+            } catch (err) {
+                await this.passErrorToExpress(err, next)
+            }
+        })
+    }
+    private async parseIdFromRequest(req : Request): Promise<number>{
+        return Number(req.params.idReservation)
+    }
+    private async fetchReservationsByIdFromDatabase(idReservation : number): Promise<any> {
+        var query: string = `SELECT "Reservation"."idReservation", "Client"."idClient","Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."prixPersonne", "Reservation"."couleur", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 1) as "dateEntree",
+        split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 2) as "typeDemiJourneeEntree", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 1) as "dateSortie", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 2) as "typeDemiJourneeSortie", DATE_PART('week', MIN("date")) as "semaineEntree", DATE_PART('week', MAX("date")) as "semaineSortie" FROM "DemiJournee"  JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_typeDemiJournee" = "DemiJournee"."typeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" HAVING "Reservation"."idReservation" = ${idReservation}`
+        return await getConnection().createEntityManager().query(query)
+    }
     private async getReservationAndDateByWeek(router: Router) {
         router.get("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
@@ -99,7 +119,7 @@ export default class ReservationController extends Controller {
         weeks["range"].forEach((week : Array<number>) => {
             havingConditions.push(`(DATE_PART('week', MIN("date")) <= ${week[1]} AND  DATE_PART('week', MAX("date")) >= ${week[0]})`)
         })
-        var query: string = `SELECT "Reservation"."idReservation", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."prixPersonne", "Reservation"."couleur", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 1) as "dateEntree",
+        var query: string = `SELECT "Reservation"."idReservation", "Client"."idClient", "Reservation"."nomReservation", "Reservation"."descReservation", "Reservation"."prixPersonne", "Reservation"."couleur", "Reservation"."etatReservation", "Client"."nomClient", "Client"."prenomClient", split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 1) as "dateEntree",
         split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 2) as "typeDemiJourneeEntree", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 1) as "dateSortie", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 2) as "typeDemiJourneeSortie", DATE_PART('week', MIN("date")) as "semaineEntree", DATE_PART('week', MAX("date")) as "semaineSortie" FROM "DemiJournee"  JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_typeDemiJournee" = "DemiJournee"."typeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient" ${havingConditions.length > 0 ? 'HAVING' : ''} ${havingConditions.join(" OR ")}`
         return await getConnection().createEntityManager().query(query)
     }
@@ -279,19 +299,30 @@ export default class ReservationController extends Controller {
         return result.affected !== 0
     }
     async addPut(router: Router) {
-        router.put("/idReservation", async (req: Request, res: Response, next: NextFunction) => {
+        router.put("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                var reservation: Reservation = await this.reservationRepository.findOneOrFail(await this.parseIdReservationFromRequest(req))
+                var reservation: Reservation
+                try{
+                    reservation = await this.reservationRepository.findOneOrFail(await this.parseIdReservationFromRequest(req))
+                }catch(err){
+                    await this.sendResponse(res, 404, { message: "Reservation not found" })
+                }
                 var reservationMerged: Reservation = await this.mergeReservationWithRequest(reservation, req)
+                console.log(reservationMerged);
+
                 await this.updateReservationInDatabase(reservationMerged);
                 await this.sendResponse(res, 200, { message: "Reservation Updated" })
+                next()
             } catch (err) {
                 await this.passErrorToExpress(err, next)
             }
         })
     }
     private async mergeReservationWithRequest(reservation: Reservation, req: Request): Promise<Reservation> {
-        return this.reservationRepository.merge(req.body, reservation)
+        var reservationMerged : Reservation = this.reservationRepository.merge(reservation, req.body)
+        if(reservation.clientIdClient != req.body.idClient)
+            reservationMerged.clientIdClient = await this.connection.getRepository(Client).findOneOrFail(req.body.idClient)
+        return reservationMerged
     }
     private async updateReservationInDatabase(reservation: Reservation): Promise<Reservation> {
         return await this.reservationRepository.save(reservation)
