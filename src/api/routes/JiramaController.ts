@@ -69,6 +69,9 @@ export default class JiramaController extends Controller {
             try {
                 var reservation: Reservation = await getConnection().getRepository(Reservation).findOneOrFail(req.params.idReservation)
                 var appareilToSave: Appareil = await this.createAppareilFromRequest(req)
+                if(req.body.puissanceType === "a"){
+                    appareilToSave.puissance = 220 * req.body.puissance
+                }
                 var appareilSaved: Appareil = await this.saveAppareilToDatabase(appareilToSave)
                 var utiliserToSave: Utiliser = new Utiliser()
                 utiliserToSave.appareilIdAppareil = appareilSaved;
