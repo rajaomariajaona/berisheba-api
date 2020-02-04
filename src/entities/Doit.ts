@@ -9,29 +9,11 @@ export class Doit {
 
    
     @ManyToOne(()=>Autre, (Autre: Autre)=>Autre.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
-    @JoinColumn({ name:'Autre_typeAutre'})
-    autreTypeAutre:Autre;
+    @JoinColumn({ name:'Autre_idAutre'})
+    autreIdAutre:Autre;
 
-
-   
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
     reservationIdReservation:Reservation;
-
-
-    @Column("double precision",{ 
-        nullable:false,
-        name:"prixAutre"
-        })
-    prixAutre:number;
-        
-
-    @Column("varchar",{ 
-        nullable:false,
-        primary:true,
-        length:100,
-        name:"motif"
-        })
-    motif:string;
         
 }
