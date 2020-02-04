@@ -8,7 +8,7 @@ import {Reservation} from "./Reservation";
 export class Utiliser {
 
    
-    @ManyToOne(()=>Appareil, (Appareil: Appareil)=>Appareil.utilisers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
+    @ManyToOne(()=>Appareil, (Appareil: Appareil)=>Appareil.utilisers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' ,eager: true})
     @JoinColumn({ name:'Appareil_idAppareil'})
     appareilIdAppareil:Appareil;
 
