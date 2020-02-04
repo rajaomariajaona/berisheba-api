@@ -12,6 +12,12 @@ export class Doit {
     @JoinColumn({ name:'Autre_idAutre'})
     autreIdAutre:Autre;
 
+    @Column("double precision",{ 
+        nullable:false,
+        name:"prixAutre"
+        })
+    prixAutre:number;
+
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
     reservationIdReservation:Reservation;

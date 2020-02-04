@@ -9,12 +9,6 @@ export class Autre {
         name: "idAutre",
     })
     idAutre: number;
-
-    @Column("double precision",{ 
-        nullable:false,
-        name:"prixAutre"
-        })
-    prixAutre:number;
         
 
     @Column("varchar",{ 
