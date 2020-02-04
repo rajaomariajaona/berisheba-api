@@ -8,7 +8,7 @@ import {Reservation} from "./Reservation";
 export class Doit {
 
    
-    @ManyToOne(()=>Autre, (Autre: Autre)=>Autre.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
+    @ManyToOne(()=>Autre, (Autre: Autre)=>Autre.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' ,eager: true})
     @JoinColumn({ name:'Autre_idAutre'})
     autreIdAutre:Autre;
 
