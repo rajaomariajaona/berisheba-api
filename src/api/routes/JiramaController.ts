@@ -34,10 +34,10 @@ export default class JiramaController extends Controller {
         await this.getJiramaByIdReservation(router)
     }
     private async getJiramaByIdReservation(router: Router) {
-        router.get("/:id", async (req, res, next) => {
+        router.get("/:idReservation", async (req, res, next) => {
             try {
-                var utilisers: Utiliser[] = await this.fetchJiramaFromDatabase(Number(req.params.id))
-                var stats = (await getConnection().createEntityManager().query(`SELECT CEIL(CEIL(SUM(("Utiliser"."duree" * puissance) / 3600))/1000) as consommation FROM "Utiliser" INNER JOIN "Appareil" ON "Appareil"."idAppareil" = "Utiliser"."Appareil_idAppareil" WHERE "Reservation_idReservation" = ${req.params.id};`) as Array<Object>)[0];
+                var utilisers: Utiliser[] = await this.fetchJiramaFromDatabase(Number(req.params.idReservation))
+                var stats = (await getConnection().createEntityManager().query(`SELECT CEIL(CEIL(SUM(("Utiliser"."duree" * puissance) / 3600))/1000) as consommation, CEIL(CEIL(SUM(("Utiliser"."duree" * puissance) / 3600))/1000) * "prixKW" as prix  FROM "Utiliser" INNER JOIN "Appareil" ON "Appareil"."idAppareil" = "Utiliser"."Appareil_idAppareil" INNER JOIN "Reservation" ON "Reservation"."idReservation" = "Reservation_idReservation" WHERE "Reservation_idReservation" = ${req.params.idReservation} GROUP BY "Reservation"."prixKW";`) as Array<Object>)[0];
                 if (await this.isJiramaExist(utilisers)) {
                     await this.sendResponse(res, 200, { data: utilisers, stats: stats})
                 } else {
@@ -123,6 +123,9 @@ export default class JiramaController extends Controller {
             try {
                 var appareil: Appareil = await this.appareilRepository.findOneOrFail(req.body.idAppareil)            
                 var appareilToModify: Appareil = await this.mergeAppareilFromRequest(appareil, req)
+                if(req.body.puissanceType === "a"){
+                    appareilToModify.puissance = 220 * req.body.puissance
+                }
                 var appareilModified: Appareil = await this.saveAppareilToDatabase(appareilToModify)
                 var result = getConnection().query(`UPDATE "Utiliser" SET "duree" = ${req.body.duree} WHERE "Reservation_idReservation" = ${req.params.idReservation} AND "Appareil_idAppareil" = ${appareilModified.idAppareil}`)
                 if (result) {

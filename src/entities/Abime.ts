@@ -3,9 +3,9 @@ import {Ustensile} from "./Ustensile";
 import {Reservation} from "./Reservation";
 
 
-@Entity("Rendre" )
+@Entity("Abime" )
 @Index("fk_Ustensile_has_Reservation1_Reservation1",["reservationIdReservation",])
-export class Rendre {
+export class Abime {
 
    
     @ManyToOne(()=>Ustensile, (Ustensile: Ustensile)=>Ustensile.rendres,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
@@ -20,8 +20,8 @@ export class Rendre {
 
     @Column("int",{ 
         nullable:false,
-        name:"nbRendue"
+        name:"nbAbime"
         })
-    nbRendue:number;
+    nbAbime:number;
         
 }

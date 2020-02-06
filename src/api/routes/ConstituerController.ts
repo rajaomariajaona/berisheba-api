@@ -26,7 +26,7 @@ export default class ConstituerController extends Controller {
         await this.getAllConstituer(router)
     }
     private async getAllConstituer(router: Router): Promise<void> {
-        router.get("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
+        router.get("/:idReservation/demijournee", async (req: Request, res: Response, next: NextFunction) => {
             try {
                 try {
                     var reservation = await this.connection.getRepository(Reservation).findOneOrFail(this.checkAndReturnIdReservation(req))
@@ -64,7 +64,7 @@ export default class ConstituerController extends Controller {
     async addDelete(router: Router): Promise<void> {
     }
     async addPut(router: Router): Promise<void> {
-        router.put("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
+        router.put("/:idReservation/demijournee", async (req: Request, res: Response, next: NextFunction) => {
             try {
                 var reservation: Reservation;
                 try {
@@ -95,8 +95,10 @@ export default class ConstituerController extends Controller {
                     entityManager.query(`DELETE FROM "Constituer" WHERE "Reservation_idReservation" = ${reservation.idReservation}`)
                     entityManager.save(DemiJournee, demiJourneesToSave)
                     entityManager.save(Constituer, constituersToSave)
-                }).then(_ => {
-                    this.sendResponse(res, 200, { data: "Update successfully" })
+                }).then(async _ => {
+                    //TODO: TEST
+                    var conflicted = await this.getConflictedSalle(reservation.idReservation)[0]
+                    await this.sendResponse(res, 200, { data: "Update successfully", salle: conflicted})
                     next()
                 }).catch(err => {
                     throw err;
@@ -106,6 +108,71 @@ export default class ConstituerController extends Controller {
             }
         })
 
+    }
+
+    async getConflictedSalle(idReservation: number): Promise<any>{
+        var query: string = `SELECT
+        "idSalle",
+        "idReservation",
+        "nomSalle",
+        "nomReservation",
+        "nomClient",
+        "prenomClient",
+        "dateEntree",
+        "typeDemiJourneeEntree",
+        "dateSortie",
+        "typeDemiJourneeSortie"
+        FROM 
+        (SELECT 
+        "Concerner"."salleIdSalle" as "salleID",
+        "Reservation"."idReservation" as "reservationID"
+        FROM "DemiJournee" 
+        JOIN "Constituer" 
+        ON "Constituer"."DemiJournee_date" = "DemiJournee".date 
+        AND "Constituer"."DemiJournee_typeDemiJournee" = "DemiJournee"."typeDemiJournee" 
+        JOIN "Reservation" ON
+        "Constituer"."Reservation_idReservation" = "Reservation"."idReservation"
+        JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" 
+        JOIN "Concerner" ON
+        "Concerner"."reservationIdReservation" = "Reservation"."idReservation"
+        WHERE ((CONCAT("Constituer"."DemiJournee_date", ' ',"Constituer"."DemiJournee_typeDemiJournee") 
+                 >= 
+                 (SELECT min(Concat("DemiJournee_date", ' ', "DemiJournee_typeDemiJournee"))
+                  FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}))
+                AND
+        (CONCAT("Constituer"."DemiJournee_date", ' ',"Constituer"."DemiJournee_typeDemiJournee")
+         <= 
+         (SELECT max(Concat("DemiJournee_date", ' ', "DemiJournee_typeDemiJournee"))
+          FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation})))  AND "Reservation"."idReservation" <> ${idReservation}
+        GROUP BY "Reservation"."idReservation", "Client"."idClient", "Concerner"."salleIdSalle"
+        HAVING "Concerner"."salleIdSalle" in 
+        (--GET CONFLICTED SALLE
+        SELECT "salleIdSalle" FROM "Concerner" WHERE "Concerner"."reservationIdReservation" = ${idReservation} AND "salleIdSalle" not in 
+        (SELECT "idSalle" FROM "Salle"
+        WHERE "Salle"."idSalle" not in 
+        (SELECT "Concerner"."salleIdSalle" FROM "Reservation" INNER JOIN "Concerner" 
+        ON "Concerner"."reservationIdReservation" = "Reservation"."idReservation"
+        WHERE "idReservation" in
+        (SELECT DISTINCT("Reservation"."idReservation") FROM "Reservation" 
+        inner join "Constituer" 
+        ON "Constituer"."Reservation_idReservation" = 
+        "Reservation"."idReservation" 
+        GROUP BY "Reservation"."idReservation", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee"
+        HAVING ((CONCAT("Constituer"."DemiJournee_date", ' ',"Constituer"."DemiJournee_typeDemiJournee") >= 
+        (SELECT min(Concat("DemiJournee_date", ' ', "DemiJournee_typeDemiJournee")) 
+         FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}))
+        AND
+        (CONCAT("Constituer"."DemiJournee_date", ' ',
+        "Constituer"."DemiJournee_typeDemiJournee") <=
+         (SELECT max(Concat("DemiJournee_date", ' ', "DemiJournee_typeDemiJournee")
+        ) FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}))) 
+         AND "Reservation"."idReservation" <> ${idReservation}))))
+        ) AS SalleReservation
+        INNER JOIN "Salle" on "salleID" = "Salle"."idSalle"
+        INNER JOIN (SELECT "Reservation"."idReservation" as "idReservation", "Reservation"."nomReservation","Client"."nomClient", "Client"."prenomClient", split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 1) as "dateEntree",
+                split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', ${idReservation}) as "typeDemiJourneeEntree", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 1) as "dateSortie", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', ${idReservation}) as "typeDemiJourneeSortie" FROM "DemiJournee"  JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_typeDemiJournee" = "DemiJournee"."typeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient")
+                AS RerservationWithDetails ON "idReservation" = "reservationID"`
+        return await getConnection().createEntityManager().query(query)
     }
 
     async deleteConstituers(idReservation: number) {

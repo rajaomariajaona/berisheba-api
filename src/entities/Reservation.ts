@@ -2,7 +2,7 @@ import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne
 import {Client} from "./Client";
 import {Payer} from "./Payer";
 import {Doit} from "./Doit";
-import {Rendre} from "./Rendre";
+import {Abime} from "./Abime";
 import {Emprunt} from "./Emprunt";
 import {Utiliser} from "./Utiliser";
 import {Constituer} from "./Constituer";
@@ -86,8 +86,8 @@ export class Reservation {
     
 
    
-    @OneToMany(()=>Rendre, (Rendre: Rendre)=>Rendre.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
-    rendres:Rendre[];
+    @OneToMany(()=>Abime, (Abime: Abime)=>Abime.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    rendres:Abime[];
     
 
    
