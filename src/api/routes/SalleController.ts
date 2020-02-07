@@ -163,22 +163,6 @@ export default class SalleController extends Controller {
                 this.passErrorToExpress(err, next)
             }
         })
-
-        router.patch("/sallesconflict", async (req: Request, res: Response, next: NextFunction) => {
-            try {
-                var deleteList: Array<Object> = JSON.parse(req.body.deleteList)
-                var deleteQueries: String[] = deleteList.map<String>((value: Object) => {
-                    return `("Concerner"."reservationIdReservation" = ${Object.values(value)[0]} AND "Concerner"."salleIdSalle" = ${Object.keys(value)[0]})`
-                })
-                var query: string =
-                    `DELETE FROM "Concerner" WHERE ${deleteQueries.join(" OR ")}`
-                await getConnection().createEntityManager().query(query)
-                await this.sendResponse(res, 204, { message: "Conflict resolved" })
-            } catch (error) {
-                this.passErrorToExpress(error, next)
-            }
-        })
-
     }
     async fetchSalleFromDatabase(id: number): Promise<Salle> {
         return this.salleRepository.findOneOrFail(id)
