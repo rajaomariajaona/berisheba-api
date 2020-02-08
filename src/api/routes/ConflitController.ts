@@ -5,6 +5,7 @@ import { Salle } from '../../entities/Salle';
 import { Reservation } from '../../entities/Reservation';
 import { ormconfig } from '../../config';
 import { NextFunction } from 'express';
+import { isArray } from 'util';
 
 export default class ConflitController extends Controller {
     constructor() {
@@ -31,8 +32,9 @@ export default class ConflitController extends Controller {
                     return;
                 }
                 try {
+                    var materielConflit: Object = await this.fetchMaterielConflit(idReservation)
                     var salleConflit: Object = await this.fetchSalleConflit(idReservation)
-                    await this.sendResponse(res, 200, { salle: salleConflit });
+                    await this.sendResponse(res, 200, { salle: salleConflit, materiel: materielConflit});
                 }
                 catch (error) {
                 }
@@ -41,7 +43,75 @@ export default class ConflitController extends Controller {
                 await this.passErrorToExpress(err, next);
             }
         });
-        
+
+    }
+    private async fetchMaterielConflit(idReservation: Number): Promise<Object> {
+        var queryCheckConflict: string =
+            ` SELECT DISTINCT * FROM 
+            (SELECT "idMateriel", array_length(array_agg("idReservation"),1) as "taille", 
+             to_jsonb(array_to_json(array_agg("nomReservation"  ORDER BY "idReservation"))) as "nomReservations",
+             to_jsonb(array_to_json(array_agg("idReservation" ORDER BY "idReservation"))) as "idReservations", 
+             to_jsonb(array_to_json(array_agg("nbLouee" ORDER BY "idReservation"))) as "nbLouees"
+            --  , CONCAT("DemiJournee_date") as "date" , "DemiJournee_typeDemiJournee" as "typeDemiJournee"
+             FROM
+                        (SELECT 
+                        "Materiel"."idMateriel", "Materiel"."nomMateriel","Materiel"."nbStock", "Louer"."nbLouee","Reservation"."idReservation","Reservation"."nomReservation", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee" FROM "Materiel" 
+                        INNER JOIN "Louer" 
+                        ON "Louer"."Materiel_idMateriel" = "Materiel"."idMateriel"
+                        INNER JOIN "Reservation" 
+                        ON "Reservation"."idReservation" = "Louer"."Reservation_idReservation"
+                        INNER JOIN "Constituer" 
+                        ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation"
+                        INNER JOIN 
+                        (SELECT "Materiel"."idMateriel", ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) 
+                        as "difference", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee" FROM "Reservation" 
+                        INNER JOIN "Constituer" 
+                        ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" INNER JOIN 
+                        (SELECT "DemiJournee_date", "DemiJournee_typeDemiJournee" 
+                        FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}) as "Demi" 
+                        ON "Demi"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
+                        AND "Demi"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee"
+                        INNER JOIN "Louer" ON "Louer"."Reservation_idReservation" = "Reservation"."idReservation"
+                        INNER JOIN "Materiel" ON "Materiel"."idMateriel" = "Louer"."Materiel_idMateriel"
+                        GROUP BY "Louer"."Materiel_idMateriel", "Materiel"."idMateriel", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee"
+                        HAVING ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) < 0
+                        ORDER BY "Materiel"."idMateriel" ASC, "Constituer"."DemiJournee_date" ASC, "Constituer"."DemiJournee_typeDemiJournee" ASC)
+                        as "Conflit"
+                        ON "Conflit"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
+                        AND "Conflit"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee"
+                        GROUP BY "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee", "Reservation"."idReservation", "Materiel"."idMateriel", "Louer"."Materiel_idMateriel", "Louer"."Reservation_idReservation"
+                        ORDER BY "Materiel"."nomMateriel" ASC, "Constituer"."DemiJournee_date" ASC, "Constituer"."DemiJournee_typeDemiJournee" ASC, "Reservation"."idReservation" ASC) as "raw"
+                        GROUP BY "raw"."DemiJournee_date", "raw"."DemiJournee_typeDemiJournee", "raw"."idMateriel"
+                        ORDER BY "raw"."idMateriel" ASC)
+                    as "brut"`
+        var conflicts = await getConnection().createEntityManager().query(queryCheckConflict);
+        var conflictByIdMateriel:Object = {}
+        conflicts.forEach(conflict => {
+            if(!conflictByIdMateriel.hasOwnProperty(conflict["idMateriel"]))
+                conflictByIdMateriel[conflict["idMateriel"]] = []
+            conflictByIdMateriel[conflict["idMateriel"]].push(conflict)
+        });
+        Object.keys(conflictByIdMateriel).forEach((key) => {
+            var temp = conflictByIdMateriel[key].slice()
+            conflictByIdMateriel[key] = temp.filter(element => {
+                return !temp.some(el => {
+                    var b = (element["idReservations"].length < el["idReservations"].length)
+                    var a = this.contains(element["idReservations"], el["idReservations"])
+                    console.log(a)
+                        console.log(b)
+                    return a && b;
+                })
+            })
+        })
+        return conflictByIdMateriel;
+    }
+
+    private contains(arr1: Array<any>, arr2: Array<any>):boolean{
+        return arr1.every(element => arr2.indexOf(element) > -1);
+    }
+
+    private isEqual (arr1: Array<any>, arr2: Array<any>): boolean{
+        return arr1.length == arr2.length && this.contains(arr1,arr2);
     }
 
     private async fetchSalleConflit(idReservation: Number): Promise<Object> {

@@ -1,5 +1,6 @@
 import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
 import {Reservation} from "./Reservation";
+import { Louer } from './Louer';
 
 
 @Entity("Materiel" )
@@ -9,8 +10,7 @@ export class Materiel {
         type:"int", 
         name:"idMateriel"
         })
-    idMateriel:number;
-        
+    idMateriel:number;        
 
     @Column("varchar",{ 
         nullable:false,
@@ -28,7 +28,7 @@ export class Materiel {
         
 
    
-    @ManyToMany(()=>Reservation, (Reservation: Reservation)=>Reservation.materiels)
-    reservations:Reservation[];
+    @OneToMany(()=>Louer, (Louer: Louer)=>Louer.materielIdMateriel)
+    louers:Louer[];
     
 }

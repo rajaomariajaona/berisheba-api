@@ -8,6 +8,7 @@ import {Utiliser} from "./Utiliser";
 import {Constituer} from "./Constituer";
 import {Salle} from "./Salle";
 import {Materiel} from "./Materiel";
+import { Louer } from './Louer';
 
 
 @Entity("Reservation" )
@@ -112,8 +113,7 @@ export class Reservation {
     
 
    
-    @ManyToMany(()=>Materiel, (Materiel: Materiel)=>Materiel.reservations,{  nullable:false, })
-    @JoinTable({ name:'Louer'})
-    materiels:Materiel[];
+    @OneToMany(()=>Louer, (Louer: Louer)=>Louer.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    Louers:Louer[];
     
 }
