@@ -47,43 +47,37 @@ export default class ConflitController extends Controller {
     }
     private async fetchMaterielConflit(idReservation: Number): Promise<Object> {
         var queryCheckConflict: string =
-            ` SELECT DISTINCT * FROM 
-            (SELECT "idMateriel", array_length(array_agg("idReservation"),1) as "taille", 
-             to_jsonb(array_to_json(array_agg("nomReservation"  ORDER BY "idReservation"))) as "nomReservations",
-             to_jsonb(array_to_json(array_agg("idReservation" ORDER BY "idReservation"))) as "idReservations", 
-             to_jsonb(array_to_json(array_agg("nbLouee" ORDER BY "idReservation"))) as "nbLouees"
-            --  , CONCAT("DemiJournee_date") as "date" , "DemiJournee_typeDemiJournee" as "typeDemiJournee"
-             FROM
-                        (SELECT 
-                        "Materiel"."idMateriel", "Materiel"."nomMateriel","Materiel"."nbStock", "Louer"."nbLouee","Reservation"."idReservation","Reservation"."nomReservation", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee" FROM "Materiel" 
-                        INNER JOIN "Louer" 
-                        ON "Louer"."Materiel_idMateriel" = "Materiel"."idMateriel"
-                        INNER JOIN "Reservation" 
-                        ON "Reservation"."idReservation" = "Louer"."Reservation_idReservation"
-                        INNER JOIN "Constituer" 
-                        ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation"
-                        INNER JOIN 
-                        (SELECT "Materiel"."idMateriel", ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) 
-                        as "difference", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee" FROM "Reservation" 
-                        INNER JOIN "Constituer" 
-                        ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" INNER JOIN 
-                        (SELECT "DemiJournee_date", "DemiJournee_typeDemiJournee" 
-                        FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}) as "Demi" 
-                        ON "Demi"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
-                        AND "Demi"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee"
-                        INNER JOIN "Louer" ON "Louer"."Reservation_idReservation" = "Reservation"."idReservation"
-                        INNER JOIN "Materiel" ON "Materiel"."idMateriel" = "Louer"."Materiel_idMateriel"
-                        GROUP BY "Louer"."Materiel_idMateriel", "Materiel"."idMateriel", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee"
-                        HAVING ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) < 0
-                        ORDER BY "Materiel"."idMateriel" ASC, "Constituer"."DemiJournee_date" ASC, "Constituer"."DemiJournee_typeDemiJournee" ASC)
-                        as "Conflit"
-                        ON "Conflit"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
-                        AND "Conflit"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee"
-                        GROUP BY "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee", "Reservation"."idReservation", "Materiel"."idMateriel", "Louer"."Materiel_idMateriel", "Louer"."Reservation_idReservation"
-                        ORDER BY "Materiel"."nomMateriel" ASC, "Constituer"."DemiJournee_date" ASC, "Constituer"."DemiJournee_typeDemiJournee" ASC, "Reservation"."idReservation" ASC) as "raw"
-                        GROUP BY "raw"."DemiJournee_date", "raw"."DemiJournee_typeDemiJournee", "raw"."idMateriel"
-                        ORDER BY "raw"."idMateriel" ASC)
-                    as "brut"`
+            ` SELECT DISTINCT 
+            "Materiel"."idMateriel", "Materiel"."nomMateriel","Materiel"."nbStock", 
+            to_jsonb(array_to_json(array_agg("nbLouee" ORDER BY "idReservation")))as "nbLouees",
+            to_jsonb(array_to_json(array_agg("nomReservation" ORDER BY "idReservation"))) as "nomReservations",
+            to_jsonb(array_to_json(array_agg("idReservation" ORDER BY "idReservation"))) as "idReservations" 
+            FROM "Materiel" 
+                             INNER JOIN "Louer" 
+                             ON "Louer"."Materiel_idMateriel" = "Materiel"."idMateriel"
+                             INNER JOIN "Reservation" 
+                             ON "Reservation"."idReservation" = "Louer"."Reservation_idReservation"
+                             INNER JOIN "Constituer" 
+                             ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation"
+                             INNER JOIN 
+                             (SELECT "Materiel"."idMateriel", ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) 
+                             as "difference", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee" FROM "Reservation" 
+                             INNER JOIN "Constituer" 
+                             ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" INNER JOIN 
+                             (SELECT "DemiJournee_date", "DemiJournee_typeDemiJournee" 
+                             FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}) as "Demi" 
+                             ON "Demi"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
+                             AND "Demi"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee"
+                             INNER JOIN "Louer" ON "Louer"."Reservation_idReservation" = "Reservation"."idReservation"
+                             INNER JOIN "Materiel" ON "Materiel"."idMateriel" = "Louer"."Materiel_idMateriel"
+                             GROUP BY "Louer"."Materiel_idMateriel", "Materiel"."idMateriel", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee"
+                             HAVING ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) < 0
+                             ORDER BY "Materiel"."idMateriel" ASC, "Constituer"."DemiJournee_date" ASC, "Constituer"."DemiJournee_typeDemiJournee" ASC)
+                             as "Conflit"
+                             ON "Conflit"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
+                             AND "Conflit"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee" AND "Conflit"."idMateriel" = "Materiel"."idMateriel"
+                             GROUP BY "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee", "Materiel"."idMateriel"
+                               ORDER BY "Materiel"."nomMateriel" ASC`
         var conflicts = await getConnection().createEntityManager().query(queryCheckConflict);
         var conflictByIdMateriel:Object = {}
         conflicts.forEach(conflict => {
