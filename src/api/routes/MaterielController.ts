@@ -1,8 +1,9 @@
 import { Controller } from "../Controller";
-import { Repository, Connection, createConnection } from "typeorm";
+import { Repository, Connection, createConnection, getConnection, DeleteResult} from "typeorm";
 import { Materiel } from "../../entities/Materiel";
 import { ormconfig } from '../../config';
 import {Router, Request, Response, NextFunction} from "express"
+import { Reservation } from '../../entities/Reservation';
 export default class MaterielController extends Controller {
     materielRepository: Repository<Materiel>
 
@@ -23,7 +24,34 @@ export default class MaterielController extends Controller {
         }
     }
     async addGet(router: Router): Promise<void> {
+        await this.getMaterielDispo(router)
         await this.getAllMateriel(router)
+    }
+    private async getMaterielDispo(router: Router): Promise<void> {
+        router.get("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                var idReservation: Number = Number(req.params.idReservation)
+                try {
+                    await getConnection().getRepository(Reservation).findOneOrFail(idReservation.toString())
+                    var query: string =
+                        `SELECT "idMateriel", "nomMateriel", "nbStock" FROM "Materiel"
+                        WHERE "Materiel"."idMateriel" not in 
+                        (SELECT "Louer"."Materiel_idMateriel" FROM "Louer" WHERE "Louer"."Reservation_idReservation" = ${idReservation});`
+                    var materielsDispoRaw = await getConnection().createEntityManager().query(query)
+                    var materielsDispo: Object = {};
+                    (materielsDispoRaw as Array<Object>).forEach(materiel => {
+                        materielsDispo[materiel["idMateriel"]] = materiel
+                    });
+                    await this.sendResponse(res, 200, { data: materielsDispo })
+                    next()
+
+                } catch (error) {
+                    await this.sendResponse(res, 404, { message: "Reservation not found" })
+                }
+            } catch (err) {
+                await this.passErrorToExpress(err, next)
+            }
+        })
     }
     private async getAllMateriel(router: Router): Promise<void> {
         router.get("/", async (req: Request, res: Response, next: NextFunction) => {
@@ -74,18 +102,39 @@ export default class MaterielController extends Controller {
     }
 
     async addDelete(router: Router): Promise<void> {
+        this.deleteById(router)
+        this.deleteMultiple(router)
+    }
+    private async deleteById(router: Router): Promise<void>{
         router.delete("/:idMateriel", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                    await this.removeMaterielInDatabase(req)
-                    res.status(201).json({ message: "deleted successfully" })
-                next()
-            } catch (err) {
-                this.passErrorToExpress(err, next)
+                await this.materielRepository.remove(await this.materielRepository.findOne(req.params.idMateriel))
+                res.status(204).json({ message: "deleted successfully" });
             }
-        })
+            catch (err) {
+                this.passErrorToExpress(err, next);
+            }
+        });
     }
-    async removeMaterielInDatabase(req: Request) {
-        this.materielRepository.delete(req.params["idMateriel"])
+
+    private async deleteMultiple(router: Router) {
+        router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                await this.removeMaterielInDatabase(req);
+                res.status(204).json({ message: "deleted successfully" });
+            }
+            catch (err) {
+                this.passErrorToExpress(err, next);
+            }
+        });
+    }
+
+    private async removeMaterielInDatabase(req: Request): Promise<DeleteResult> {
+        return await this.materielRepository.delete(await this.parseRemoveListFromRequest(req))
+    }
+    private async parseRemoveListFromRequest(req: Request): Promise<number[]> {
+        var rawDeleteList: any = req.headers["deletelist"]
+        return JSON.parse(rawDeleteList)
     }
     async addPut(router: Router): Promise<void> {
         router.put("/:idMateriel", async (req, res, next) => {

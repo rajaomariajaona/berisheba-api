@@ -28,7 +28,6 @@ export default class SalleController extends Controller {
         await this.getSalleDispo(router)
     }
 
-    //TODO: SALLE NON DISPO OVAINA NEN SASANY
     private async getSalleDispo(router: Router): Promise<void> {
         router.get("/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
             try {

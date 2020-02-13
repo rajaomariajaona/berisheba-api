@@ -8,6 +8,7 @@ import JiramaController from './routes/JiramaController';
 import AutreController from './routes/AutreController';
 import ConcernerController from './routes/ConcernerController';
 import ConflitController from './routes/ConflitController';
+import LouerController from './routes/LouerController';
 var router = express.Router()
 router.use("/clients", new ClientController().mainRouter);
 router.use("/reservations", new ReservationController().mainRouter);
@@ -17,5 +18,6 @@ router.use("/reservations", new ConstituerController().mainRouter);
 router.use("/jirama", new JiramaController().mainRouter);
 router.use("/autres", new AutreController().mainRouter);
 router.use("/reservations", new ConcernerController().mainRouter);
+router.use("/reservations", new LouerController().mainRouter);
 router.use("/conflits", new ConflitController().mainRouter);
 export default router;

@@ -58,86 +58,10 @@ export default class ConcernerController extends Controller {
                     return;
                 }
                 try {
-                    var queryCheckConflict: string = `SELECT
-                    "idSalle",
-                    "idReservation",
-                    "nomSalle",
-                    "nomReservation",
-                    "nomClient",
-                    "prenomClient",
-                    "dateEntree",
-                    "typeDemiJourneeEntree",
-                    "dateSortie",
-                    "typeDemiJourneeSortie"
-                    FROM 
-                    (SELECT 
-                    "Concerner"."salleIdSalle" as "salleID",
-                    "Reservation"."idReservation" as "reservationID"
-                    FROM "DemiJournee" 
-                    JOIN "Constituer" 
-                    ON "Constituer"."DemiJournee_date" = "DemiJournee".date 
-                    AND "Constituer"."DemiJournee_typeDemiJournee" = "DemiJournee"."typeDemiJournee" 
-                    JOIN "Reservation" ON
-                    "Constituer"."Reservation_idReservation" = "Reservation"."idReservation"
-                    JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" 
-                    JOIN "Concerner" ON
-                    "Concerner"."reservationIdReservation" = "Reservation"."idReservation"
-                    WHERE ((CONCAT("Constituer"."DemiJournee_date", ' ',"Constituer"."DemiJournee_typeDemiJournee") 
-                             >= 
-                             (SELECT min(Concat("DemiJournee_date", ' ', "DemiJournee_typeDemiJournee"))
-                              FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}))
-                            AND
-                    (CONCAT("Constituer"."DemiJournee_date", ' ',"Constituer"."DemiJournee_typeDemiJournee")
-                     <= 
-                     (SELECT max(Concat("DemiJournee_date", ' ', "DemiJournee_typeDemiJournee"))
-                      FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation})))
-                    GROUP BY "Reservation"."idReservation", "Client"."idClient", "Concerner"."salleIdSalle"
-                    HAVING "Concerner"."salleIdSalle" in 
-                    (--GET CONFLICTED SALLE
-                    SELECT "salleIdSalle" FROM "Concerner" WHERE "Concerner"."reservationIdReservation" = ${idReservation} AND "salleIdSalle" not in 
-                    (SELECT "idSalle" FROM "Salle"
-                    WHERE "Salle"."idSalle" not in 
-                    (SELECT "Concerner"."salleIdSalle" FROM "Reservation" INNER JOIN "Concerner" 
-                    ON "Concerner"."reservationIdReservation" = "Reservation"."idReservation"
-                    WHERE "idReservation" in
-                    (SELECT DISTINCT("Reservation"."idReservation") FROM "Reservation" 
-                    inner join "Constituer" 
-                    ON "Constituer"."Reservation_idReservation" = 
-                    "Reservation"."idReservation" 
-                    GROUP BY "Reservation"."idReservation", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee"
-                    HAVING ((CONCAT("Constituer"."DemiJournee_date", ' ',"Constituer"."DemiJournee_typeDemiJournee") >= 
-                    (SELECT min(Concat("DemiJournee_date", ' ', "DemiJournee_typeDemiJournee")) 
-                     FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}))
-                    AND
-                    (CONCAT("Constituer"."DemiJournee_date", ' ',
-                    "Constituer"."DemiJournee_typeDemiJournee") <=
-                     (SELECT max(Concat("DemiJournee_date", ' ', "DemiJournee_typeDemiJournee")
-                    ) FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}))) 
-                     AND "Reservation"."idReservation" <> ${idReservation}))))
-                    ) AS SalleReservation
-                    INNER JOIN "Salle" on "salleID" = "Salle"."idSalle"
-                    INNER JOIN (SELECT "Reservation"."idReservation" as "idReservation", "Reservation"."nomReservation","Client"."nomClient", "Client"."prenomClient", split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', 1) as "dateEntree",
-                            split_part(MIN(CONCAT("date", ' ' ,"typeDemiJournee")),' ', ${idReservation}) as "typeDemiJourneeEntree", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 1) as "dateSortie", split_part(MAX(CONCAT("date", ' ' ,"typeDemiJournee")), ' ', 2) as "typeDemiJourneeSortie" FROM "DemiJournee"  JOIN "Constituer" ON "Constituer"."DemiJournee_date" = "DemiJournee".date AND "Constituer"."DemiJournee_typeDemiJournee" = "DemiJournee"."typeDemiJournee" JOIN "Reservation" ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" JOIN "Client" ON "Client"."idClient" = "Reservation"."Client_idClient" GROUP BY "Reservation"."idReservation", "Client"."idClient")
-                            AS RerservationWithDetails ON "idReservation" = "reservationID"`
                     var query: string =
                         `INSERT INTO "Concerner" VALUES (${idReservation},${idSalle}) ;`
                     await getConnection().createEntityManager().query(query)
-                    var conflict = await getConnection().createEntityManager().query(queryCheckConflict)
-                    var conflictRestructured: Object = {};
-                    (conflict as Array<Object>).forEach(value => {
-                        if (conflictRestructured[value["idSalle"]] === undefined) {
-                            conflictRestructured[value["idSalle"]] = {}
-                        }
-                        if (value["idReservation"] == idReservation) {
-                            conflictRestructured[value["idSalle"]]["new"] = value
-                        } else {
-                            if (conflictRestructured[value["idSalle"]]["old"] == undefined) {
-                                conflictRestructured[value["idSalle"]]["old"] = []
-                            }
-                            conflictRestructured[value["idSalle"]]["old"].push(value)
-                        }
-                    });
-                    await this.sendResponse(res, 201, { message: "Salle added to reservation", conflict: conflictRestructured })
+                    await this.sendResponse(res, 201, { message: "Salle added to reservation"})
                 } catch (error) {
                     await this.sendResponse(res, 400, { message: "Already exist" })
                 }

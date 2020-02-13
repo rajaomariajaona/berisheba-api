@@ -34,7 +34,7 @@ export default class ConflitController extends Controller {
                 try {
                     var materielConflit: Object = await this.fetchMaterielConflit(idReservation)
                     var salleConflit: Object = await this.fetchSalleConflit(idReservation)
-                    await this.sendResponse(res, 200, { salle: salleConflit, materiel: materielConflit});
+                    await this.sendResponse(res, 200, { salle: salleConflit, materiel: materielConflit });
                 }
                 catch (error) {
                 }
@@ -79,9 +79,9 @@ export default class ConflitController extends Controller {
                              GROUP BY "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee", "Materiel"."idMateriel"
                                ORDER BY "Materiel"."nomMateriel" ASC`
         var conflicts = await getConnection().createEntityManager().query(queryCheckConflict);
-        var conflictByIdMateriel:Object = {}
+        var conflictByIdMateriel: Object = {}
         conflicts.forEach(conflict => {
-            if(!conflictByIdMateriel.hasOwnProperty(conflict["idMateriel"]))
+            if (!conflictByIdMateriel.hasOwnProperty(conflict["idMateriel"]))
                 conflictByIdMateriel[conflict["idMateriel"]] = []
             conflictByIdMateriel[conflict["idMateriel"]].push(conflict)
         });
@@ -92,7 +92,7 @@ export default class ConflitController extends Controller {
                     var b = (element["idReservations"].length < el["idReservations"].length)
                     var a = this.contains(element["idReservations"], el["idReservations"])
                     console.log(a)
-                        console.log(b)
+                    console.log(b)
                     return a && b;
                 })
             })
@@ -100,12 +100,12 @@ export default class ConflitController extends Controller {
         return conflictByIdMateriel;
     }
 
-    private contains(arr1: Array<any>, arr2: Array<any>):boolean{
+    private contains(arr1: Array<any>, arr2: Array<any>): boolean {
         return arr1.every(element => arr2.indexOf(element) > -1);
     }
 
-    private isEqual (arr1: Array<any>, arr2: Array<any>): boolean{
-        return arr1.length == arr2.length && this.contains(arr1,arr2);
+    private isEqual(arr1: Array<any>, arr2: Array<any>): boolean {
+        return arr1.length == arr2.length && this.contains(arr1, arr2);
     }
 
     private async fetchSalleConflit(idReservation: Number): Promise<Object> {
@@ -215,6 +215,45 @@ export default class ConflitController extends Controller {
 
     private patchConflitSalle(router: Router) {
         //DELETE CONFLICTED PARTIE
+        this.patchFixSalle(router);
+        this.patchFixMateriels(router);
+    }
+
+    private patchFixMateriels(router: Router) {
+        router.patch("/materiels", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                var changes: Object = JSON.parse(req.body.changes);
+                var updateQueries: String[] = [];
+                var deleteConditions: String[] = [];
+                Object.keys(changes).forEach((idMateriel) => {
+                    Object.keys(changes[idMateriel]).forEach((idReservation) => {
+                        var nbLouee = changes[idMateriel][idReservation];
+                        if (nbLouee == 0) {
+                            deleteConditions.push(`"Reservation_idReservation" = ${idReservation} AND "Materiel_idMateriel" = ${idMateriel}`);
+                        }
+                        else {
+                            updateQueries.push(`UPDATE "Louer" SET "nbLouee" = ${nbLouee} WHERE "Reservation_idReservation" = ${idReservation} AND "Materiel_idMateriel" = ${idMateriel};`);
+                        }
+                    });
+                });
+                var deleteQuery: string = deleteConditions.length > 0 ? `DELETE FROM "Louer" WHERE ${deleteConditions.join(" OR ")};` : ``;
+                var updateQuery: string = updateQueries.length > 0 ? `${updateQueries.join(" ")}` : ``;
+                var query: string = `${deleteQuery} ${updateQuery}`;
+                var ress = await getConnection().createEntityManager().query(query);
+                await this.sendResponse(res, 204, { message: "Conflict resolved" });
+            }
+            catch (error) {
+                this.passErrorToExpress(error, next);
+            }
+        });
+    }
+
+    async addPost(router: Router): Promise<void> {
+    }
+    async addDelete(router: Router): Promise<void> {
+    }
+
+    private patchFixSalle(router: Router) {
         router.patch("/salles", async (req: Request, res: Response, next: NextFunction) => {
             try {
                 var deleteList: Array<Object> = JSON.parse(req.body.deleteList);
@@ -230,11 +269,5 @@ export default class ConflitController extends Controller {
             }
         });
     }
-
-    async addPost(router: Router): Promise<void> {
-    }
-    async addDelete(router: Router): Promise<void> {
-    }
-
 
 }
