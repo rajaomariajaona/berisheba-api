@@ -1,6 +1,6 @@
 import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
 import {Abime} from "./Abime";
-import {Emprunt} from "./Emprunt";
+import {Emprunter} from "./Emprunter";
 
 
 @Entity("Ustensile" )
@@ -40,7 +40,7 @@ export class Ustensile {
     
 
    
-    @OneToMany(()=>Emprunt, (Emprunt: Emprunt)=>Emprunt.ustensileIdUstensile,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
-    emprunts:Emprunt[];
+    @OneToMany(()=>Emprunter, (Emprunter: Emprunter)=>Emprunter.ustensileIdUstensile,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    emprunters:Emprunter[];
     
 }

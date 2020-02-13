@@ -3,7 +3,7 @@ import {Client} from "./Client";
 import {Payer} from "./Payer";
 import {Doit} from "./Doit";
 import {Abime} from "./Abime";
-import {Emprunt} from "./Emprunt";
+import {Emprunter} from "./Emprunter";
 import {Utiliser} from "./Utiliser";
 import {Constituer} from "./Constituer";
 import {Salle} from "./Salle";
@@ -92,8 +92,8 @@ export class Reservation {
     
 
    
-    @OneToMany(()=>Emprunt, (Emprunt: Emprunt)=>Emprunt.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
-    emprunts:Emprunt[];
+    @OneToMany(()=>Emprunter, (Emprunter: Emprunter)=>Emprunter.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    emprunters:Emprunter[];
     
 
    
