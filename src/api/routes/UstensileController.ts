@@ -34,7 +34,7 @@ export default class UstensileController extends Controller {
                 try {
                     await getConnection().getRepository(Reservation).findOneOrFail(idReservation.toString())
                     var query: string =
-                        `SELECT "idUstensile", "nomUstensile", "nbStock" FROM "Ustensile"
+                        `SELECT "idUstensile", "nomUstensile", "nbTotal", "prixUstensile" FROM "Ustensile"
                         WHERE "Ustensile"."idUstensile" not in 
                         (SELECT "Emprunter"."Ustensile_idUstensile" FROM "Emprunter" WHERE "Emprunter"."Reservation_idReservation" = ${idReservation});`
                     var ustensilesDispoRaw = await getConnection().createEntityManager().query(query)

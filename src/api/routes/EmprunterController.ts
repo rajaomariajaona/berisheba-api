@@ -27,8 +27,9 @@ export default class EmprunterController extends Controller {
                 try {
                     await this.reservationRepository.findOneOrFail(idReservation.toString())
                     var query: string =
-                        `SELECT "idUstensile", "nomUstensile", "nbStock", "nbLouee" FROM "Ustensile"
-                    INNER JOIN "Emprunter" ON "Ustensile"."idUstensile" = "Emprunter"."Ustensile_idUstensile" WHERE "Emprunter"."Reservation_idReservation" = ${idReservation} ;`
+                        `SELECT "idUstensile", "nomUstensile", "nbTotal", "nbEmprunte" FROM "Ustensile"
+                        INNER JOIN "Emprunter" ON "Ustensile"."idUstensile" = "Emprunter"."Ustensile_idUstensile"
+                         WHERE "Emprunter"."Reservation_idReservation" = ${idReservation} ;`
                     var ustensilesDispoRaw = await getConnection().createEntityManager().query(query)
                     var ustensiles: Object = {};
                     (ustensilesDispoRaw as Array<Object>).forEach(ustensile => {
@@ -65,7 +66,7 @@ export default class EmprunterController extends Controller {
                     })
                     if (values.length > 0) {
                         var query: string =
-                            `INSERT INTO "Emprunter" VALUES ${values.join(" , ")};`
+                            `INSERT INTO "Emprunter" ("Reservation_idReservation", "Ustensile_idUstensile", "nbEmprunte") VALUES ${values.join(" , ")};`
                         await getConnection().createEntityManager().query(query)
                     }
                     await this.sendResponse(res, 201, { message: "Ustensile added to reservation" })
@@ -113,12 +114,12 @@ export default class EmprunterController extends Controller {
                 var updateQueries: String[] = [];
                 var deleteConditions: String[] = [];
                 Object.keys(changes).forEach((idUstensile) => {
-                    var nbLouee = changes[idUstensile];
-                    if (nbLouee == 0) {
+                    var nbEmprunte = changes[idUstensile];
+                    if (nbEmprunte == 0) {
                         deleteConditions.push(`"Reservation_idReservation" = ${idReservation} AND "Ustensile_idUstensile" = ${idUstensile}`);
                     }
                     else {
-                        updateQueries.push(`UPDATE "Emprunter" SET "nbLouee" = ${nbLouee} WHERE "Reservation_idReservation" = ${idReservation} AND "Ustensile_idUstensile" = ${idUstensile};`);
+                        updateQueries.push(`UPDATE "Emprunter" SET "nbEmprunte" = ${nbEmprunte} WHERE "Reservation_idReservation" = ${idReservation} AND "Ustensile_idUstensile" = ${idUstensile};`);
                     }
                 });
                 var deleteQuery: string = deleteConditions.length > 0 ? `DELETE FROM "Emprunter" WHERE ${deleteConditions.join(" OR ")};` : ``;

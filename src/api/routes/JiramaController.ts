@@ -37,7 +37,7 @@ export default class JiramaController extends Controller {
         router.get("/:idReservation", async (req, res, next) => {
             try {
                 var utilisers: Utiliser[] = await this.fetchJiramaFromDatabase(Number(req.params.idReservation))
-                var stats = (await getConnection().createEntityManager().query(`SELECT CEIL(CEIL(SUM(("Utiliser"."duree" * puissance) / 3600))/1000) as consommation, CEIL(CEIL(SUM(("Utiliser"."duree" * puissance) / 3600))/1000) * "prixKW" as prix  FROM "Utiliser" INNER JOIN "Appareil" ON "Appareil"."idAppareil" = "Utiliser"."Appareil_idAppareil" INNER JOIN "Reservation" ON "Reservation"."idReservation" = "Reservation_idReservation" WHERE "Reservation_idReservation" = ${req.params.idReservation} GROUP BY "Reservation"."prixKW";`) as Array<Object>)[0];
+                var stats = (await getConnection().createEntityManager().query(`SELECT CEIL(CEIL(SUM(("Utiliser"."duree" * puissance) / 3600))/1000) as consommation, CEIL(CEIL(SUM(("Utiliser"."duree" * puissance) / 3600))/1000) * "prixKW" as prix  FROM "Utiliser" INNER JOIN "Appareil" ON "Appareil"."idAppareil" = "Utiliser"."Appareil_idAppareil" INNER JOIN "Reservation" ON "Reservation"."idReservation" = "Reservation_idReservation" WHERE "Reservation_idReservation" = ${req.params.idReservation} GROUP BY "Reservation"."idReservation";`) as Array<Object>)[0];
                 if (await this.isJiramaExist(utilisers)) {
                     await this.sendResponse(res, 200, { data: utilisers, stats: stats})
                 } else {
