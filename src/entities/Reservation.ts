@@ -40,15 +40,7 @@ export class Reservation {
         nullable:false,
         name:"etatReservation"
         })
-    etatReservation:boolean;
-
-
-    @Column("boolean",{ 
-        nullable:false,
-        name:"nbPersonneIdentique"
-        })
-    nbPersonneIdentique:boolean;
-        
+    etatReservation:boolean;        
 
     @Column("varchar",{ 
         nullable:true,

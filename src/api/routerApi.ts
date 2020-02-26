@@ -11,6 +11,8 @@ import ConflitController from './routes/ConflitController';
 import LouerController from './routes/LouerController';
 import UstensileController from './routes/UstensileController';
 import EmprunterController from './routes/EmprunterController';
+import PaiementController from './routes/PaiementController';
+import StatistiqueController from './routes/StatistiqueController';
 var router = express.Router()
 router.use("/clients", new ClientController().mainRouter);
 router.use("/reservations", new ReservationController().mainRouter);
@@ -24,4 +26,6 @@ router.use("/reservations", new ConcernerController().mainRouter);
 router.use("/reservations", new LouerController().mainRouter);
 router.use("/reservations", new EmprunterController().mainRouter);
 router.use("/conflits", new ConflitController().mainRouter);
+router.use("/payer", new PaiementController().mainRouter);
+router.use("/statistique", new StatistiqueController().mainRouter);
 export default router;

@@ -339,6 +339,24 @@ export default class ReservationController extends Controller {
                 await this.passErrorToExpress(err, next);
             }
         });
+        router.patch("/:idReservation/etatReservation", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                var reservation: Reservation;
+                try {
+                    reservation = await this.reservationRepository.findOneOrFail(await this.parseIdReservationFromRequest(req));
+                }
+                catch (err) {
+                    await this.sendResponse(res, 404, { message: "Reservation not found" });
+                }
+                reservation.etatReservation = req.body.etatReservation;
+                await this.reservationRepository.save(reservation);
+                await this.sendResponse(res, 200, { message: "Reservation Updated" });
+                next();
+            }
+            catch (err) {
+                await this.passErrorToExpress(err, next);
+            }
+        });
     }
 
     private async mergeReservationWithRequest(reservation: Reservation, req: Request): Promise<Reservation> {
