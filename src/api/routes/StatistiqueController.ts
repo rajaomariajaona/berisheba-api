@@ -92,7 +92,7 @@ export default class StatistiqueController extends Controller {
                 GROUP BY "MoisAnnee"."annee"
                 `;
             var response = await this.entityManager.query(statQuery);
-            this.sendResponse(res, 200, { ...response[0] });
+            this.sendResponse(res, 200, { data : response});
         });
     }
 
