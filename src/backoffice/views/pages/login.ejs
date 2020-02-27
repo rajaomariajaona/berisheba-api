@@ -1,16 +1,40 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset='utf-8'>
     <title>Bienvenue</title>
+    <%- include ("../partial/assetsCSS") %>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
 </head>
+
 <body>
-    LOGIN
-    <form action="/admin/login" method="post">
-        <input type="text" name="username">
-        <input type="password" name="password" id="">
-        <button type="submit">GO</button>
-    </form>
+    <div class="container-fluid">
+        <div class="row align-items-center" id="container">
+
+            <div id="login" class="col-12 col-md-6">
+                <%- include ("../partial/login_form") %>
+
+            </div>
+            <div id="side" class="col-12 col-md-6 d-none d-md-block order-first">
+                <div class="row justify-content-center py-5">
+                    <div class="col-10 wow slideInDown">
+                        <img class="img-fluid rounded" src="/img/logo.png" alt="">
+
+                    </div>
+                </div>
+                <div class="row justify-content-center py-5  wow slideInUp">
+                    <div class="col-8">
+
+                        <p class="text-center text-white" id="parole">'Dieu est avec toi dans tout ce que tu fais.'</p>
+                        <p class="text-right text-white" id="reference">Genèse 22 : 21</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <%- include ("../partial/assetsJS") %>
 </body>
+
 </html>

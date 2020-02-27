@@ -2,16 +2,19 @@ import { Router, Request, NextFunction, Response } from 'express';
 import { Connection, createConnection, Repository } from 'typeorm';
 import { ormconfig } from '../config';
 import { User } from '../entities/User';
+import { Device } from '../entities/Device';
 export default class AdminController {
 
     router: Router
     userRepository: Repository<User>
+    deviceRepository: Repository<Device>
     constructor() {
         this.router = Router()
         this.addRoutes(this.router)
         createConnection(ormconfig).then((connection) => {
 
             this.userRepository = connection.getRepository(User)
+            this.deviceRepository = connection.getRepository(Device)
         })
     }
 
@@ -26,7 +29,7 @@ export default class AdminController {
         })
         router.get("/", async (req: Request, res: Response, next: NextFunction) => {
             if (req.session.loggedin) {
-                res.render("pages/dashboard")
+                res.render("pages/dashboard", {data : (await this.deviceRepository.find())})
             }else{
                 res.redirect("/admin/login")
             }
