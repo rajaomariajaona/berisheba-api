@@ -16,3 +16,9 @@
     font-size: 25px;
     font-style: italic;
 }
+.custom-primary-bg{
+    background-color:rgb(55, 171, 200)!important;
+}
+.custom-primary-color{
+    color:rgb(55, 171, 200)!important;
+}
