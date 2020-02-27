@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include ("../partial/assetsCSS") %>
     <title>Tableau de bord</title>
 </head>
 
 <body>
+    <%- include ("../partial/navbar") %>
     DASHBOARD
-    <form action="/admin/logout" method="post">
-        <button type="submit">LOGOUT</button>
+    <form action="/admin/logout" class="d-none" id="logout-form" method="post">
     </form>
     <table>
         <th>nom d´utilisteur</th>
@@ -26,6 +27,7 @@
         </tr>
         <% }) %>
     </table>
+    <%- include ("../partial/assetsJS") %>
 </body>
 
 </html>

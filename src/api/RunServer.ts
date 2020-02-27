@@ -25,9 +25,10 @@ export default () => {
         saveUninitialized: true
     }),disableCache(),
     new AdminController().router)
-    // app.use("/", (req: Request, res: Response, next: NextFunction) => {
-    //     // res.redirect("/admin");
-    // })
+    app.use("/", (req: Request, res: Response, next: NextFunction) => {
+        res.redirect("/admin");
+        next()
+    })
     console.log("Server started")
     return app.listen(process.env.PORT || 3000)
 }
