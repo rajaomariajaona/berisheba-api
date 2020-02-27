@@ -6,6 +6,10 @@ $(document).ready(() => {
       $("#logout-form").submit();
     });
   }
+  $(".auth-btn").click((evt) => {
+      $('input#deviceid').val(evt.currentTarget.id)
+      $('#toggle-form').submit()
+  })
   $("#dtBasicExample").DataTable({
     language: {
       sEmptyTable: "Aucune donnée disponible dans le tableau",

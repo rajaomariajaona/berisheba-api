@@ -70,5 +70,20 @@ export default class AdminController {
                     res.redirect("/")
             })
         })
+        router.post("/device", async (req: Request, res: Response, next: NextFunction) => {
+            if(req.session.loggedin){
+                try {
+                    var device: Device = await this.deviceRepository.findOneOrFail(req.body.deviceid)
+                    device.authorized = !device.authorized
+                    await this.deviceRepository.save(device)
+                    res.redirect("/")
+                } catch (error) {
+                    res.render('pages/error')
+                }
+                
+            }else{
+                res.render('pages/error')
+            }
+        })
     }
 }
