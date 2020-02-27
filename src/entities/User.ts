@@ -12,7 +12,20 @@ export class User {
         name:"username"
     })
     username:string;
-        
+    
+    @Column("varchar",{ 
+        nullable:false,
+        length:100,
+        name:"email"
+        })
+    email:string;
+
+    @Column("varchar",{ 
+        nullable:true,
+        length:6,
+        name:"forgetCode"
+        })
+    forgetCode:string;
 
     @Column("varchar",{ 
         nullable:false,

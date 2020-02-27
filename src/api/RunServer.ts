@@ -22,11 +22,20 @@ export default () => {
         secret: process.env.SESSION_SECRET,
         resave: true,
         saveUninitialized: true
-    }),
-        new AdminController().router)
+    }),disableCache(),
+    new AdminController().router)
     app.use("/", (req: Request, res: Response, next: NextFunction) => {
         res.redirect("/admin");
     })
     console.log("Server started")
     return app.listen(process.env.PORT || 3000)
+}
+
+function disableCache() {
+    return (req: Request, res: Response, next: NextFunction) => {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+        next();
+    };
 }
