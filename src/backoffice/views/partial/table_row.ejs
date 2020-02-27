@@ -1,0 +1,15 @@
+<tr>
+    <td> <%= device.utilisateur %> </td>
+    <td> <%= device.deviceid %> </td>
+    <td> <%= device.information %> </td>
+    <td> <% if(device.authorized) {%>
+        <button  id="<%= device.deviceid %>" class="btn auth-btn btn-sm px-3 text-white py-1 m-0 custom-primary-bg">
+            Autorisé
+        </button>
+        <% } else{ %>
+        <button  id="<%= device.deviceid %>" class="btn auth-btn btn-sm px-3 text-white py-1 m-0 btn-danger">
+        Non-Autorisé
+        </button>
+        <% }%>
+    </td>
+</tr>

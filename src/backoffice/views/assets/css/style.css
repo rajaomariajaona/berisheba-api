@@ -1,0 +1,24 @@
+
+#container{
+    height: 100vh;
+    width: 100vw;
+}
+#side{
+    background-color:rgb(55, 171, 200);
+    height: 100%;
+    width: 100%;
+}
+#parole, #reference{
+    font-family: 'Poppins';
+    font-size: 33px;
+}
+#reference{
+    font-size: 25px;
+    font-style: italic;
+}
+.custom-primary-bg{
+    background-color:rgb(55, 171, 200)!important;
+}
+.custom-primary-color{
+    color:rgb(55, 171, 200)!important;
+}

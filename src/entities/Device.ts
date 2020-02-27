@@ -14,4 +14,18 @@ export class Device {
         name:"authorized"
         })
     authorized:boolean;
+
+    @Column("varchar",{ 
+        nullable:false,
+        length: 50,
+        name:"utilisateur"
+        })
+    utilisateur:string;
+
+    @Column("varchar",{ 
+        nullable:false,
+        length: 100,
+        name:"information"
+        })
+    information:string;
 }

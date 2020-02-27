@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include ("../partial/assetsCSS") %>
+    <title>Tableau de bord</title>
+</head>
+
+<body>
+    <%- include ("../partial/navbar") %>
+    <form action="/admin/logout" class="d-none" id="logout-form" method="post">
+    </form>
+    <form action="/admin/device" class="d-none" id="toggle-form" method="post">
+        <input type="text" name="deviceid" id="deviceid">
+    </form>
+    <div class="container">
+        <div class="row pt-5">
+            <div class="col-12">
+                <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th class="th-sm">Nom utilisateur
+                            </th>
+                            <th class="th-sm">IMEI
+                            </th>
+                            <th class="th-sm">Information
+                            </th>
+                            <th class="th-sm">Autorisation
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% data.forEach(device => { %>
+                        <%- include ("../partial/table_row", { device: device}) %>
+                        <% }) %>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="th-sm">Nom utilisateur
+                            </th>
+                            <th class="th-sm">IMEI
+                            </th>
+                            <th class="th-sm">Information
+                            </th>
+                            <th class="th-sm">Autorisation
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <%- include ("../partial/assetsJS") %>
+</body>
+
+</html>
