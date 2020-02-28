@@ -10,17 +10,23 @@ export class Device {
         })
     deviceid:string;
     @Column("bool",{ 
-        nullable:false,
+        nullable:true,
         name:"authorized"
         })
     authorized:boolean;
 
     @Column("varchar",{ 
-        nullable:false,
+        nullable:true,
         length: 50,
         name:"utilisateur"
         })
-    utilisateur:string;
+    utilisateur:string|null;
+    @Column("varchar",{ 
+        nullable:true,
+        length: 50,
+        name:"email"
+        })
+    email:string|null;
 
     @Column("varchar",{ 
         nullable:false,
@@ -28,4 +34,10 @@ export class Device {
         name:"information"
         })
     information:string;
+    @Column("varchar",{ 
+        nullable:true,
+        length: 256,
+        name:"description"
+        })
+    description:string;
 }

@@ -26,8 +26,7 @@ export default () => {
     }),disableCache(),
     new AdminController().router)
     app.use("/", (req: Request, res: Response, next: NextFunction) => {
-        res.redirect("/admin");
-        next()
+        res.redirect("/admin")
     })
     console.log("Server started")
     return app.listen(process.env.PORT || 3000)

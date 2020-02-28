@@ -20,7 +20,22 @@ export default class DeviceController {
             }
 
             this.deviceRepository.findOneOrFail(req.body["deviceid"])
-                .then((device) => {
+                .then(async (device) => {
+                    var changed: boolean = false
+                    if (device.information != req.body["information"]) {
+                        device.information = req.body["information"]
+                        changed = true
+                    }
+                    if (device.utilisateur != req.body["utilisateur"]) {
+                        device.utilisateur = req.body["utilisateur"]
+                        changed = true
+                    }
+                    if (device.email != req.body["email"]) {
+                        device.email = req.body["email"]
+                        changed = true
+                    }
+                    if (changed)
+                        await this.deviceRepository.save(device)
                     if (device.authorized) {
                         res.status(200).send({
                             token: jwt.sign({ deviceid: device.deviceid }, process.env.AUTHORIZATION_PASS_PHRASE, { expiresIn: "1h" })
@@ -30,11 +45,12 @@ export default class DeviceController {
                         res.status(401).send({ message: "device not authorized" })
                     }
                 })
-                .catch(error => {
-                    var device: Device = new Device()
-                    device.deviceid = req.body["deviceid"]
-                    device.authorized = false
-                    this.deviceRepository.save(device)
+                .catch(async error => {
+                    if ((req.body["deviceid"] as string).toLowerCase() != "unknow" ) {
+                        var device: Device = this.deviceRepository.create(req.body as Object)
+                        device.authorized = false
+                        await this.deviceRepository.save(device)
+                    }
                     res.status(401).send({ message: "device not authorized" })
                 })
         });
