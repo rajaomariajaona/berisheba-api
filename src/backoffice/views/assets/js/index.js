@@ -1,4 +1,23 @@
 $(document).ready(() => {
+  $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+    var value = $("select#filter").val();
+    switch (value) {
+      case "all":
+        return true;
+      case "not-authorized":
+        return data[4].includes("Non-Autorisé");
+      case "authorized":
+        return (
+          !data[4].includes("Non-Autorisé") && data[4].includes("Autorisé")
+        );
+      case "confirm":
+        return data[4].includes("Accepter") || data[4].includes("Rejeter");
+
+      default:
+        return true;
+    }
+    return true;
+  });
   var logout_btn = $("#logout");
   if (logout_btn) {
     logout_btn.click(() => {
@@ -6,11 +25,14 @@ $(document).ready(() => {
       $("#logout-form").submit();
     });
   }
-  $(".auth-btn").click((evt) => {
-      $('input#deviceid').val(evt.currentTarget.id)
-      $('#toggle-form').submit()
-  })
-  $("#dtBasicExample").DataTable({
+  $(".auth-btn").click(evt => {
+    $("input#deviceid").val(evt.currentTarget.id);
+    $("input#choice").val(
+      $(evt.currentTarget).hasClass("accept") ? true : false
+    );
+    $("#device-form").submit();
+  });
+  var table = $("#dtBasicExample").DataTable({
     language: {
       sEmptyTable: "Aucune donnée disponible dans le tableau",
       sInfo: "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
@@ -42,5 +64,8 @@ $(document).ready(() => {
         },
       },
     },
+  });
+  $("select#filter").change(() => {
+    table.draw();
   });
 });
