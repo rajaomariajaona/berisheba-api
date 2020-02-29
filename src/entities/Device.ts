@@ -13,7 +13,7 @@ export class Device {
         nullable:true,
         name:"authorized"
         })
-    authorized:boolean;
+    authorized:boolean|null;
 
     @Column("varchar",{ 
         nullable:true,
@@ -39,5 +39,5 @@ export class Device {
         length: 256,
         name:"description"
         })
-    description:string;
+    description:string|null;
 }

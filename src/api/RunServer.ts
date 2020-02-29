@@ -17,16 +17,17 @@ export default () => {
     app.use("/api", router)
     app.use("/device", new DeviceController().router)
     app.set('views', './src/backoffice/views');
-    app.set("view engine", "ejs")    
-    app.use(express.static(__dirname.replace("/api","") + '/backoffice/views/assets'))
+    app.set("view engine", "ejs")
+    app.use(express.static(__dirname.replace("/api", "") + '/backoffice/views/assets'))
     app.use("/admin", session({
         secret: process.env.SESSION_SECRET,
         resave: true,
         saveUninitialized: true
-    }),disableCache(),
-    new AdminController().router)
+    }), disableCache(),
+        new AdminController().router)
     app.use("/", (req: Request, res: Response, next: NextFunction) => {
-        res.redirect("/admin")
+        if (!res.headersSent)
+            res.redirect("/admin")
     })
     console.log("Server started")
     return app.listen(process.env.PORT || 3000)
