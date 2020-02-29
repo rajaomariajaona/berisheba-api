@@ -34,7 +34,8 @@ export default class ConflitController extends Controller {
                 try {
                     var materielConflit: Object = await this.fetchMaterielConflit(idReservation)
                     var salleConflit: Object = await this.fetchSalleConflit(idReservation)
-                    await this.sendResponse(res, 200, { salle: salleConflit, materiel: materielConflit });
+                    var ustensileConflit: Object = await this.fetchUstensileConflit(idReservation)
+                    await this.sendResponse(res, 200, { salle: salleConflit, materiel: materielConflit,ustensile: ustensileConflit });
                 }
                 catch (error) {
                 }
@@ -53,31 +54,31 @@ export default class ConflitController extends Controller {
             to_jsonb(array_to_json(array_agg("nomReservation" ORDER BY "idReservation"))) as "nomReservations",
             to_jsonb(array_to_json(array_agg("idReservation" ORDER BY "idReservation"))) as "idReservations" 
             FROM "Materiel" 
-                             INNER JOIN "Louer" 
-                             ON "Louer"."Materiel_idMateriel" = "Materiel"."idMateriel"
-                             INNER JOIN "Reservation" 
-                             ON "Reservation"."idReservation" = "Louer"."Reservation_idReservation"
-                             INNER JOIN "Constituer" 
-                             ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation"
-                             INNER JOIN 
-                             (SELECT "Materiel"."idMateriel", ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) 
-                             as "difference", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee" FROM "Reservation" 
-                             INNER JOIN "Constituer" 
-                             ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" INNER JOIN 
-                             (SELECT "DemiJournee_date", "DemiJournee_typeDemiJournee" 
-                             FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}) as "Demi" 
-                             ON "Demi"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
-                             AND "Demi"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee"
-                             INNER JOIN "Louer" ON "Louer"."Reservation_idReservation" = "Reservation"."idReservation"
-                             INNER JOIN "Materiel" ON "Materiel"."idMateriel" = "Louer"."Materiel_idMateriel"
-                             GROUP BY "Louer"."Materiel_idMateriel", "Materiel"."idMateriel", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee"
-                             HAVING ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) < 0
-                             ORDER BY "Materiel"."idMateriel" ASC, "Constituer"."DemiJournee_date" ASC, "Constituer"."DemiJournee_typeDemiJournee" ASC)
-                             as "Conflit"
-                             ON "Conflit"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
-                             AND "Conflit"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee" AND "Conflit"."idMateriel" = "Materiel"."idMateriel"
-                             GROUP BY "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee", "Materiel"."idMateriel"
-                               ORDER BY "Materiel"."nomMateriel" ASC`
+            INNER JOIN "Louer" 
+            ON "Louer"."Materiel_idMateriel" = "Materiel"."idMateriel"
+            INNER JOIN "Reservation" 
+            ON "Reservation"."idReservation" = "Louer"."Reservation_idReservation"
+            INNER JOIN "Constituer" 
+            ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation"
+            INNER JOIN 
+            (SELECT "Materiel"."idMateriel", ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) 
+            as "difference", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee" FROM "Reservation" 
+            INNER JOIN "Constituer" 
+            ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" INNER JOIN 
+            (SELECT "DemiJournee_date", "DemiJournee_typeDemiJournee" 
+            FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}) as "Demi" 
+            ON "Demi"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
+            AND "Demi"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee"
+            INNER JOIN "Louer" ON "Louer"."Reservation_idReservation" = "Reservation"."idReservation"
+            INNER JOIN "Materiel" ON "Materiel"."idMateriel" = "Louer"."Materiel_idMateriel"
+            GROUP BY "Louer"."Materiel_idMateriel", "Materiel"."idMateriel", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee"
+            HAVING ("Materiel"."nbStock" - SUM("Louer"."nbLouee")) < 0
+            ORDER BY "Materiel"."idMateriel" ASC, "Constituer"."DemiJournee_date" ASC, "Constituer"."DemiJournee_typeDemiJournee" ASC)
+            as "Conflit"
+            ON "Conflit"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
+            AND "Conflit"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee" AND "Conflit"."idMateriel" = "Materiel"."idMateriel"
+            GROUP BY "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee", "Materiel"."idMateriel"
+              ORDER BY "Materiel"."nomMateriel" ASC`
         var conflicts = await getConnection().createEntityManager().query(queryCheckConflict);
         var conflictByIdMateriel: Object = {}
         conflicts.forEach(conflict => {
@@ -107,7 +108,60 @@ export default class ConflitController extends Controller {
     private isEqual(arr1: Array<any>, arr2: Array<any>): boolean {
         return arr1.length == arr2.length && this.contains(arr1, arr2);
     }
-
+    private async fetchUstensileConflit(idReservation: Number): Promise<Object> {
+            var queryCheckConflict: string =
+                ` SELECT DISTINCT 
+                "Ustensile"."idUstensile", "Ustensile"."nomUstensile","Ustensile"."nbTotal", 
+                to_jsonb(array_to_json(array_agg("nbEmprunte" ORDER BY "idReservation")))as "nbEmpruntes",
+                to_jsonb(array_to_json(array_agg("nomReservation" ORDER BY "idReservation"))) as "nomReservations",
+                to_jsonb(array_to_json(array_agg("idReservation" ORDER BY "idReservation"))) as "idReservations" 
+                FROM "Ustensile" 
+                 INNER JOIN "Emprunter" 
+                 ON "Emprunter"."Ustensile_idUstensile" = "Ustensile"."idUstensile"
+                 INNER JOIN "Reservation" 
+                 ON "Reservation"."idReservation" = "Emprunter"."Reservation_idReservation"
+                 INNER JOIN "Constituer" 
+                 ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation"
+                 INNER JOIN 
+                 (SELECT "Ustensile"."idUstensile", ("Ustensile"."nbTotal" - SUM("Emprunter"."nbEmprunte")) 
+                 as "difference", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee" FROM "Reservation" 
+                 INNER JOIN "Constituer" 
+                 ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" INNER JOIN 
+                 (SELECT "DemiJournee_date", "DemiJournee_typeDemiJournee" 
+                 FROM "Constituer" WHERE "Reservation_idReservation" = ${idReservation}) as "Demi" 
+                 ON "Demi"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
+                 AND "Demi"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee"
+                 INNER JOIN "Emprunter" ON "Emprunter"."Reservation_idReservation" = "Reservation"."idReservation"
+                 INNER JOIN "Ustensile" ON "Ustensile"."idUstensile" = "Emprunter"."Ustensile_idUstensile"
+                 GROUP BY "Emprunter"."Ustensile_idUstensile", "Ustensile"."idUstensile", "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee"
+                 HAVING ("Ustensile"."nbTotal" - SUM("Emprunter"."nbEmprunte")) < 0
+                 ORDER BY "Ustensile"."idUstensile" ASC, "Constituer"."DemiJournee_date" ASC, "Constituer"."DemiJournee_typeDemiJournee" ASC)
+                 as "Conflit"
+                 ON "Conflit"."DemiJournee_date" = "Constituer"."DemiJournee_date" 
+                 AND "Conflit"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee" AND "Conflit"."idUstensile" = "Ustensile"."idUstensile"
+                 GROUP BY "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee", "Ustensile"."idUstensile"
+                   ORDER BY "Ustensile"."nomUstensile" ASC`
+            var conflicts = await getConnection().createEntityManager().query(queryCheckConflict);
+            var conflictByIdUstensile: Object = {}
+            conflicts.forEach(conflict => {
+                if (!conflictByIdUstensile.hasOwnProperty(conflict["idUstensile"]))
+                    conflictByIdUstensile[conflict["idUstensile"]] = []
+                conflictByIdUstensile[conflict["idUstensile"]].push(conflict)
+            });
+            Object.keys(conflictByIdUstensile).forEach((key) => {
+                var temp = conflictByIdUstensile[key].slice()
+                conflictByIdUstensile[key] = temp.filter(element => {
+                    return !temp.some(el => {
+                        var b = (element["idReservations"].length < el["idReservations"].length)
+                        var a = this.contains(element["idReservations"], el["idReservations"])
+                        console.log(a)
+                        console.log(b)
+                        return a && b;
+                    })
+                })
+            })
+            return conflictByIdUstensile;
+        }
     private async fetchSalleConflit(idReservation: Number): Promise<Object> {
         var queryCheckConflict: string = `SELECT
                     "idSalle",
@@ -208,15 +262,44 @@ export default class ConflitController extends Controller {
     }
 
     async addPut(router: Router): Promise<void> {
-        this.patchConflitSalle(router);
+        this.patchFixConflit(router);
     }
 
 
 
-    private patchConflitSalle(router: Router) {
-        //DELETE CONFLICTED PARTIE
+    private patchFixConflit(router: Router) {
+        this.patchFixUstensiles(router);
         this.patchFixSalle(router);
         this.patchFixMateriels(router);
+    }
+
+    private patchFixUstensiles(router: Router) {
+        router.patch("/ustensiles", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                var changes: Object = JSON.parse(req.body.changes);
+                var updateQueries: String[] = [];
+                var deleteConditions: String[] = [];
+                Object.keys(changes).forEach((idUstensile) => {
+                    Object.keys(changes[idUstensile]).forEach((idReservation) => {
+                        var nbEmprunte = changes[idUstensile][idReservation];
+                        if (nbEmprunte == 0) {
+                            deleteConditions.push(`"Reservation_idReservation" = ${idReservation} AND "Ustensile_idUstensile" = ${idUstensile}`);
+                        }
+                        else {
+                            updateQueries.push(`UPDATE "Emprunter" SET "nbEmprunte" = ${nbEmprunte} WHERE "Reservation_idReservation" = ${idReservation} AND "Ustensile_idUstensile" = ${idUstensile};`);
+                        }
+                    });
+                });
+                var deleteQuery: string = deleteConditions.length > 0 ? `DELETE FROM "Emprunter" WHERE ${deleteConditions.join(" OR ")};` : ``;
+                var updateQuery: string = updateQueries.length > 0 ? `${updateQueries.join(" ")}` : ``;
+                var query: string = `${deleteQuery} ${updateQuery}`;
+                var ress = await getConnection().createEntityManager().query(query);
+                await this.sendResponse(res, 204, { message: "Conflict resolved" });
+            }
+            catch (error) {
+                this.passErrorToExpress(error, next);
+            }
+        });
     }
 
     private patchFixMateriels(router: Router) {
@@ -247,12 +330,6 @@ export default class ConflitController extends Controller {
             }
         });
     }
-
-    async addPost(router: Router): Promise<void> {
-    }
-    async addDelete(router: Router): Promise<void> {
-    }
-
     private patchFixSalle(router: Router) {
         router.patch("/salles", async (req: Request, res: Response, next: NextFunction) => {
             try {
@@ -269,5 +346,11 @@ export default class ConflitController extends Controller {
             }
         });
     }
+    async addPost(router: Router): Promise<void> {
+    }
+    async addDelete(router: Router): Promise<void> {
+    }
+
+ 
 
 }
