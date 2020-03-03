@@ -112,10 +112,12 @@ export default class ClientController extends Controller {
         await this.deleteMultiple(router);
         await this.deleteById(router);
     }
+    
     private async deleteById(router: Router): Promise<void>{
         router.delete("/:idClient", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                await this.clientRepository.remove(await this.clientRepository.findOne(req.params.idClient))
+                var client: Client = await this.clientRepository.findOne(req.params.idClient)
+                await this.clientRepository.remove(client)
                 res.status(204).json({ message: "deleted successfully" });
             }
             catch (err) {
