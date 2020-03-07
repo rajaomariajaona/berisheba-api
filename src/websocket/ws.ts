@@ -10,6 +10,7 @@ export class MyWebSocket {
             MyWebSocket.wss.on('connection', function connection(ws) {
                 ws["isAlive"] = true;
                 ws.on('message', function incoming(message) {
+                    console.log(message);
                     MyWebSocket.wss.clients.forEach((client: WebSocket) => {
                         client.send(message);
                     })

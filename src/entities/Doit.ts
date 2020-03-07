@@ -8,30 +8,18 @@ import {Reservation} from "./Reservation";
 export class Doit {
 
    
-    @ManyToOne(()=>Autre, (Autre: Autre)=>Autre.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
-    @JoinColumn({ name:'Autre_typeAutre'})
-    autreTypeAutre:Autre;
-
-
-   
-    @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
-    @JoinColumn({ name:'Reservation_idReservation'})
-    reservationIdReservation:Reservation;
-
+    @ManyToOne(()=>Autre, (Autre: Autre)=>Autre.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' ,eager: true})
+    @JoinColumn({ name:'Autre_idAutre'})
+    autreIdAutre:Autre;
 
     @Column("double precision",{ 
         nullable:false,
         name:"prixAutre"
         })
     prixAutre:number;
-        
 
-    @Column("varchar",{ 
-        nullable:false,
-        primary:true,
-        length:100,
-        name:"motif"
-        })
-    motif:string;
+    @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.doits,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
+    @JoinColumn({ name:'Reservation_idReservation'})
+    reservationIdReservation:Reservation;
         
 }

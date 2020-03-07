@@ -4,18 +4,25 @@ import {Utiliser} from "./Utiliser";
 
 @Entity("Appareil" )
 export class Appareil {
+    @PrimaryGeneratedColumn({
+        name: "idAppareil"
+    })
+    idAppareil: number;
 
+    @Column("double precision",{ 
+        nullable:false,
+        name:"puissance"
+        })
+    puissance:number;
     @Column("varchar",{ 
         nullable:false,
-        primary:true,
-        length:50,
-        name:"typeAppareil"
+        length:100,
+        name:"nomAppareil"
         })
-    typeAppareil:string;
+    nomAppareil:string;
         
-
    
-    @OneToMany(()=>Utiliser, (Utiliser: Utiliser)=>Utiliser.appareilTypeAppareil,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    @OneToMany(()=>Utiliser, (Utiliser: Utiliser)=>Utiliser.appareilIdAppareil,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
     utilisers:Utiliser[];
     
 }

@@ -8,31 +8,15 @@ import {Reservation} from "./Reservation";
 export class Utiliser {
 
    
-    @ManyToOne(()=>Appareil, (Appareil: Appareil)=>Appareil.utilisers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
-    @JoinColumn({ name:'Appareil_typeAppareil'})
-    appareilTypeAppareil:Appareil;
+    @ManyToOne(()=>Appareil, (Appareil: Appareil)=>Appareil.utilisers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' ,eager: true})
+    @JoinColumn({ name:'Appareil_idAppareil'})
+    appareilIdAppareil:Appareil;
 
 
    
     @ManyToOne(()=>Reservation, (Reservation: Reservation)=>Reservation.utilisers,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Reservation_idReservation'})
     reservationIdReservation:Reservation;
-
-
-    @Column("varchar",{ 
-        nullable:false,
-        length:100,
-        name:"nomAppareil"
-        })
-    nomAppareil:string;
-        
-
-    @Column("double precision",{ 
-        nullable:false,
-        name:"puissance"
-        })
-    puissance:number;
-        
 
     @Column("int",{ 
         nullable:false,

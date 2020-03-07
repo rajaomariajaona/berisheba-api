@@ -1,19 +1,18 @@
 import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
 import {Client} from "./Client";
-import {TypeReservation} from "./TypeReservation";
 import {Payer} from "./Payer";
 import {Doit} from "./Doit";
-import {Rendre} from "./Rendre";
-import {Emprunt} from "./Emprunt";
+import {Abime} from "./Abime";
+import {Emprunter} from "./Emprunter";
 import {Utiliser} from "./Utiliser";
 import {Constituer} from "./Constituer";
 import {Salle} from "./Salle";
 import {Materiel} from "./Materiel";
+import { Louer } from './Louer';
 
 
 @Entity("Reservation" )
 @Index("fk_Reservation_Client",["clientIdClient",])
-@Index("fk_Reservation_TypeReservation1",["typeReservationTypeReservation",])
 export class Reservation {
 
     @PrimaryGeneratedColumn({
@@ -41,15 +40,7 @@ export class Reservation {
         nullable:false,
         name:"etatReservation"
         })
-    etatReservation:boolean;
-
-
-    @Column("boolean",{ 
-        nullable:false,
-        name:"nbPersonneIdentique"
-        })
-    nbPersonneIdentique:boolean;
-        
+    etatReservation:boolean;        
 
     @Column("varchar",{ 
         nullable:true,
@@ -75,14 +66,7 @@ export class Reservation {
    
     @ManyToOne(()=>Client, (Client: Client)=>Client.reservations,{  nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
     @JoinColumn({ name:'Client_idClient'})
-    clientIdClient:Client | null;
-
-
-   
-    @ManyToOne(()=>TypeReservation, (TypeReservation: TypeReservation)=>TypeReservation.reservations,{  nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' })
-    @JoinColumn({ name:'TypeReservation_typeReservation'})
-    typeReservationTypeReservation:TypeReservation | null;
-
+    clientIdClient:Client;
 
    
     @OneToMany(()=>Payer, (Payer: Payer)=>Payer.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
@@ -95,13 +79,13 @@ export class Reservation {
     
 
    
-    @OneToMany(()=>Rendre, (Rendre: Rendre)=>Rendre.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
-    rendres:Rendre[];
+    @OneToMany(()=>Abime, (Abime: Abime)=>Abime.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    rendres:Abime[];
     
 
    
-    @OneToMany(()=>Emprunt, (Emprunt: Emprunt)=>Emprunt.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
-    emprunts:Emprunt[];
+    @OneToMany(()=>Emprunter, (Emprunter: Emprunter)=>Emprunter.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    emprunters:Emprunter[];
     
 
    
@@ -121,8 +105,7 @@ export class Reservation {
     
 
    
-    @ManyToMany(()=>Materiel, (Materiel: Materiel)=>Materiel.reservations,{  nullable:false, })
-    @JoinTable({ name:'Louer'})
-    materiels:Materiel[];
+    @OneToMany(()=>Louer, (Louer: Louer)=>Louer.reservationIdReservation,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    Louers:Louer[];
     
 }

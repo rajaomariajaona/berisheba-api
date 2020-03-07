@@ -10,7 +10,7 @@ var connectionOption: ConnectionOptions = {
    schema: "public",
    synchronize: true,
    entities: [
-      "build/entities/*.js"
+    "src/entities/**/*.ts"
    ],
 }
 

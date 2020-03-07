@@ -1,6 +1,6 @@
 import {BaseEntity,Column,Entity,Index,JoinColumn,JoinTable,ManyToMany,ManyToOne,OneToMany,OneToOne,PrimaryColumn,PrimaryGeneratedColumn,RelationId} from "typeorm";
-import {Rendre} from "./Rendre";
-import {Emprunt} from "./Emprunt";
+import {Abime} from "./Abime";
+import {Emprunter} from "./Emprunter";
 
 
 @Entity("Ustensile" )
@@ -26,15 +26,21 @@ export class Ustensile {
         name:"nbTotal"
         })
     nbTotal:number;
+
+    @Column("double precision",{ 
+        nullable:true,
+        name:"prixUstensile"
+        })
+    prixUstensile:number;
         
 
    
-    @OneToMany(()=>Rendre, (Rendre: Rendre)=>Rendre.ustensileIdUstensile,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
-    rendres:Rendre[];
+    @OneToMany(()=>Abime, (Abime: Abime)=>Abime.ustensileIdUstensile,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    rendres:Abime[];
     
 
    
-    @OneToMany(()=>Emprunt, (Emprunt: Emprunt)=>Emprunt.ustensileIdUstensile,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
-    emprunts:Emprunt[];
+    @OneToMany(()=>Emprunter, (Emprunter: Emprunter)=>Emprunter.ustensileIdUstensile,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    emprunters:Emprunter[];
     
 }

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include ("../partial/assetsCSS") %>
+    <title>Tableau de bord</title>
+</head>
+
+<body>
+    <%- include ("../partial/navbar") %>
+    <form action="/admin/logout" class="d-none" id="logout-form" method="post">
+    </form>
+    <form action="/admin/device" class="d-none" id="device-form" method="post">
+        <input type="text" name="deviceid" id="deviceid">
+        <input type="text" name="choice" id="choice">
+    </form>
+    <div class="container">
+        <div class="row pb-2 pt-5 justify-content-center">
+            <div class="col-8 col-md-4 offset-md-8">
+                <select id="filter" class="browser-default custom-select">
+                    <option selected value="all">Tout</option>
+                    <option value="confirm">En attente</option>
+                    <option value="authorized">Autorisé</option>
+                    <option value="not-authorized">Non Autorisé</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <table id="dtBasicExample" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th class="th-sm">Appareil
+                            </th>
+                            <th class="th-sm">Information
+                            </th>
+                            <th class="th-sm">Utilisateur
+                            </th>
+                            <th class="th-sm">Description
+                            </th>
+                            <th class="th-sm">Autorisation
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% data.forEach(device => { %>
+                        <%- include ("../partial/table_row", { device: device}) %>
+                        <% }) %>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="th-sm">Appareil
+                            </th>
+                            <th class="th-sm">Information
+                            </th>
+                            <th class="th-sm">Utilisateur
+                            </th>
+                            <th class="th-sm">Description
+                            </th>
+                            <th class="th-sm">Autorisation
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <%- include ("../partial/assetsJS") %>
+</body>
+
+</html>

@@ -14,7 +14,7 @@ export class Payer {
 
 
    
-    @ManyToOne(()=>Paiement, (Paiement: Paiement)=>Paiement.payers,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION' })
+    @ManyToOne(()=>Paiement, (Paiement: Paiement)=>Paiement.payers,{ primary:true, nullable:false,onDelete: 'NO ACTION',onUpdate: 'NO ACTION', eager: true })
     @JoinColumn({ name:'Paiement_typePaiement'})
     paiementTypePaiement:Paiement;
 

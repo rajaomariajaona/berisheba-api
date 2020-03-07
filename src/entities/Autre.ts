@@ -4,18 +4,21 @@ import {Doit} from "./Doit";
 
 @Entity("Autre" )
 export class Autre {
+    @PrimaryGeneratedColumn({
+        type: "int",
+        name: "idAutre",
+    })
+    idAutre: number;
+        
 
     @Column("varchar",{ 
         nullable:false,
-        primary:true,
-        length:50,
-        name:"typeAutre"
+        length:100,
+        name:"motif"
         })
-    typeAutre:string;
-        
-
+    motif:string;
    
-    @OneToMany(()=>Doit, (Doit: Doit)=>Doit.autreTypeAutre,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
+    @OneToMany(()=>Doit, (Doit: Doit)=>Doit.autreIdAutre,{ onDelete: 'CASCADE' ,onUpdate: 'CASCADE' })
     doits:Doit[];
     
 }

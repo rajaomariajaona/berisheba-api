@@ -109,14 +109,33 @@ export default class ClientController extends Controller {
     }
 
     async addDelete(router: Router): Promise<void> {
+        await this.deleteMultiple(router);
+        await this.deleteById(router);
+    }
+    
+    private async deleteById(router: Router): Promise<void>{
+        router.delete("/:idClient", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                var client: Client = await this.clientRepository.findOne(req.params.idClient)
+                await this.clientRepository.remove(client)
+                res.status(204).json({ message: "deleted successfully" });
+            }
+            catch (err) {
+                this.passErrorToExpress(err, next);
+            }
+        });
+    }
+
+    private async deleteMultiple(router: Router) {
         router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
             try {
-                await this.removeClientInDatabase(req)
-                res.status(204).json({ message: "deleted successfully" })
-            } catch (err) {
-                this.passErrorToExpress(err, next)
+                await this.removeClientInDatabase(req);
+                res.status(204).json({ message: "deleted successfully" });
             }
-        })
+            catch (err) {
+                this.passErrorToExpress(err, next);
+            }
+        });
     }
 
     private async removeClientInDatabase(req: Request): Promise<DeleteResult> {

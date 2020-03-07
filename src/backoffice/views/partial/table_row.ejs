@@ -1,0 +1,24 @@
+<tr>
+    <td> <%= device.deviceid %> </td>
+    <td> <%= device.information %> </td>
+    <td> <%= device.utilisateur %> </td>
+    <td> <%= device.description %> </td>
+    <td>
+        <% if (device.authorized == undefined || device.authorized == null) { %>
+        <button id="<%= device.deviceid %>" class="btn accept auth-btn btn-sm px-3 text-white py-1 m-0 custom-primary-bg">
+            Accepter
+        </button>
+        <button id="<%= device.deviceid %>" class="btn denied auth-btn btn-sm px-3 text-white py-1 m-0 btn-danger">
+            Rejeter
+        </button>
+        <%} else if(device.authorized) {%>
+        <button id="<%= device.deviceid %>" class="btn denied auth-btn btn-sm px-3 text-white py-1 m-0 custom-primary-bg">
+            Autorisé
+        </button>
+        <% } else{ %>
+        <button id="<%= device.deviceid %>" class="btn accept auth-btn btn-sm px-3 text-white py-1 m-0 btn-danger">
+            Non-Autorisé
+        </button>
+        <% }%>
+    </td>
+</tr>

@@ -4,7 +4,6 @@ import {DemiJournee} from "./DemiJournee";
 
 
 @Entity("Constituer" )
-//@Index("fk_Constituer_DemiJournee1",["demiJourneeDate","demiJourneeTypeDemiJournee",])
 export class Constituer {
 
    
@@ -22,7 +21,7 @@ export class Constituer {
 
    
     @ManyToOne(()=>DemiJournee, (DemiJournee: DemiJournee)=>DemiJournee,{ primary:true, nullable:false,onDelete: 'CASCADE',onUpdate: 'CASCADE' ,eager : true})
-    @JoinColumn([{ name:'DemiJournee_date', referencedColumnName: "date"}, { name:'DemiJournee_TypeDemiJournee', referencedColumnName: "TypeDemiJournee"}])
+    @JoinColumn([{ name:'DemiJournee_date', referencedColumnName: "date"}, { name:'DemiJournee_typeDemiJournee', referencedColumnName: "typeDemiJournee"}])
     demiJournee:DemiJournee;
 
 }
