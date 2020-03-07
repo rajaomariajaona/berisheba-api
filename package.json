@@ -4,7 +4,7 @@
    "description": "",
    "main": "build/index.js",
    "scripts": {
-      "start": "npx ts-node ./src/index.ts"
+      "start": "ts-node ./src/index.ts"
    },
    "author": "",
    "license": "ISC",
