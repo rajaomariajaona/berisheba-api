@@ -22,3 +22,6 @@
 .custom-primary-color{
     color:rgb(55, 171, 200)!important;
 }
+.wow{
+    visibility: hidden;
+}
