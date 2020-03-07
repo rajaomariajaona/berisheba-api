@@ -1,5 +1,5 @@
 import { Controller } from "../Controller";
-import { Repository, Connection, createConnection, getConnection } from "typeorm";
+import { Repository, Connection, createConnection, getConnection, DeleteResult } from "typeorm";
 import { Salle } from "../../entities/Salle";
 import { ormconfig } from '../../config';
 import { Router, Request, Response, NextFunction } from "express"
