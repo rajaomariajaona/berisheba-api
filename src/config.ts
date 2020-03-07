@@ -18,8 +18,9 @@ var connectionOptionHeroku: ConnectionOptions = {
    type: "postgres",
    url: process.env.DATABASE_URL,
    synchronize: true,
+   schema: "public",
    entities: [
-      "build/entities/*.js"
+    "src/entities/**/*.ts"
    ],
 }
 
