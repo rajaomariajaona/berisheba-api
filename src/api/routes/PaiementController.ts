@@ -164,10 +164,6 @@ export default class PaiementController extends Controller {
                             if (sommePayee != undefined) {
 
                                 var count: number = await this.payerRepository.count({ where: { reservationIdReservation: req.params.idReservation, paiementTypePaiement: "avance" } })
-                                if (prixPayee + sommePayee >= prixTotal) {
-                                    this.sendResponse(res, 400, { message: "Avance >= prixTotal " })
-                                    return;
-                                }
                                 if (count > 0) {
                                     var query: string = `UPDATE "Payer" SET "sommePayee" = "sommePayee" + ${sommePayee} WHERE "Reservation_idReservation" = ${req.params.idReservation} AND "Paiement_typePaiement" = '${typePaiement}';`
                                     await em.query(query)
@@ -200,10 +196,6 @@ export default class PaiementController extends Controller {
                                 }
                                 var count: number = await this.payerRepository.count({ where: { reservationIdReservation: req.params.idReservation, paiementTypePaiement: "remise" } })
 
-                                if (prixPayee + sommePayee >= prixTotal) {
-                                    this.sendResponse(res, 400, { message: "Remise >= prixTotal " })
-                                    return;
-                                }
                                 if (count > 0) {
                                     var query: string = `UPDATE "Payer" SET "sommePayee" = "sommePayee" + ${sommePayee} WHERE "Reservation_idReservation" = ${req.params.idReservation} AND "Paiement_typePaiement" = '${typePaiement}';`
                                     await em.query(query)

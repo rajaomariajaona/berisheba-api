@@ -6,6 +6,7 @@ import { Reservation } from '../../entities/Reservation';
 import { ormconfig } from '../../config';
 import { NextFunction } from 'express';
 import { isArray } from 'util';
+import { Payer } from '../../entities/Payer';
 
 export default class ConflitController extends Controller {
     constructor() {
@@ -35,7 +36,8 @@ export default class ConflitController extends Controller {
                     var materielConflit: Object = await this.fetchMaterielConflit(idReservation)
                     var salleConflit: Object = await this.fetchSalleConflit(idReservation)
                     var ustensileConflit: Object = await this.fetchUstensileConflit(idReservation)
-                    await this.sendResponse(res, 200, { salle: salleConflit, materiel: materielConflit,ustensile: ustensileConflit });
+                    var payerConflit: Object = await this.fetchPayerConflit(idReservation)
+                    await this.sendResponse(res, 200, { salle: salleConflit, materiel: materielConflit, ustensile: ustensileConflit, payer: payerConflit });
                 }
                 catch (error) {
                 }
@@ -109,8 +111,8 @@ export default class ConflitController extends Controller {
         return arr1.length == arr2.length && this.contains(arr1, arr2);
     }
     private async fetchUstensileConflit(idReservation: Number): Promise<Object> {
-            var queryCheckConflict: string =
-                ` SELECT DISTINCT 
+        var queryCheckConflict: string =
+            ` SELECT DISTINCT 
                 "Ustensile"."idUstensile", "Ustensile"."nomUstensile","Ustensile"."nbTotal", 
                 to_jsonb(array_to_json(array_agg("nbEmprunte" ORDER BY "idReservation")))as "nbEmpruntes",
                 to_jsonb(array_to_json(array_agg("nomReservation" ORDER BY "idReservation"))) as "nomReservations",
@@ -141,27 +143,27 @@ export default class ConflitController extends Controller {
                  AND "Conflit"."DemiJournee_typeDemiJournee" = "Constituer"."DemiJournee_typeDemiJournee" AND "Conflit"."idUstensile" = "Ustensile"."idUstensile"
                  GROUP BY "Constituer"."DemiJournee_date", "Constituer"."DemiJournee_typeDemiJournee", "Ustensile"."idUstensile"
                    ORDER BY "Ustensile"."nomUstensile" ASC`
-            var conflicts = await getConnection().createEntityManager().query(queryCheckConflict);
-            var conflictByIdUstensile: Object = {}
-            conflicts.forEach(conflict => {
-                if (!conflictByIdUstensile.hasOwnProperty(conflict["idUstensile"]))
-                    conflictByIdUstensile[conflict["idUstensile"]] = []
-                conflictByIdUstensile[conflict["idUstensile"]].push(conflict)
-            });
-            Object.keys(conflictByIdUstensile).forEach((key) => {
-                var temp = conflictByIdUstensile[key].slice()
-                conflictByIdUstensile[key] = temp.filter(element => {
-                    return !temp.some(el => {
-                        var b = (element["idReservations"].length < el["idReservations"].length)
-                        var a = this.contains(element["idReservations"], el["idReservations"])
-                        console.log(a)
-                        console.log(b)
-                        return a && b;
-                    })
+        var conflicts = await getConnection().createEntityManager().query(queryCheckConflict);
+        var conflictByIdUstensile: Object = {}
+        conflicts.forEach(conflict => {
+            if (!conflictByIdUstensile.hasOwnProperty(conflict["idUstensile"]))
+                conflictByIdUstensile[conflict["idUstensile"]] = []
+            conflictByIdUstensile[conflict["idUstensile"]].push(conflict)
+        });
+        Object.keys(conflictByIdUstensile).forEach((key) => {
+            var temp = conflictByIdUstensile[key].slice()
+            conflictByIdUstensile[key] = temp.filter(element => {
+                return !temp.some(el => {
+                    var b = (element["idReservations"].length < el["idReservations"].length)
+                    var a = this.contains(element["idReservations"], el["idReservations"])
+                    console.log(a)
+                    console.log(b)
+                    return a && b;
                 })
             })
-            return conflictByIdUstensile;
-        }
+        })
+        return conflictByIdUstensile;
+    }
     private async fetchSalleConflit(idReservation: Number): Promise<Object> {
         var queryCheckConflict: string = `SELECT
                     "idSalle",
@@ -261,6 +263,53 @@ export default class ConflitController extends Controller {
         return conflictRestructured
     }
 
+    private async fetchPayerConflit(idReservation: Number): Promise<Object> {
+        var queryPrixTotal: string = `
+        SELECT (
+            -- Prix de location Chambre
+                (SELECT SUM("nbPersonne" * ("Reservation"."prixPersonne" / 2))
+                FROM "Reservation" INNER JOIN "Constituer" 
+                ON "Constituer"."Reservation_idReservation" = "Reservation"."idReservation" 
+                WHERE "Reservation"."idReservation" = ${idReservation}
+                GROUP BY "Reservation"."idReservation")
+            -- Prix de location Chambre
+                 +
+            -- Prix Autre
+                (SELECT COALESCE(SUM("prixAutre"), 0) as "prixTotalAutre"
+                FROM "Reservation" INNER JOIN "Doit" 
+                ON "Doit"."Reservation_idReservation" = "Reservation"."idReservation"
+                WHERE "Reservation"."idReservation" = ${idReservation})
+            -- Prix Autre
+            +
+            -- Prix Jirama
+                (SELECT COALESCE(SUM(CEIL(CEIL((("Utiliser"."duree" * "puissance") / 3600))/1000) * "prixKW"), 0)
+                as "prixTotalJirama"
+                FROM "Reservation" INNER JOIN "Utiliser" 
+                ON "Utiliser"."Reservation_idReservation" = "Reservation"."idReservation"
+                INNER JOIN "Appareil" ON "Appareil"."idAppareil" = "Utiliser"."Appareil_idAppareil"
+                WHERE "Reservation"."idReservation" = ${idReservation})
+            -- Prix Jirama
+            
+        ) as "prixTotal"
+        `;
+        var prixTotal: number = (await getConnection().createEntityManager().query(queryPrixTotal))[0]["prixTotal"];
+        let payerRepository: Repository<Payer> = await getConnection().getRepository(Payer)
+        let payers: Payer[] = await payerRepository.find({ where: { reservationIdReservation: idReservation } })
+        let isReste: boolean = false;
+        let totalTemp: number = 0;
+        payers.forEach(payer => {
+            if (payer.paiementTypePaiement.typePaiement == "reste")
+                isReste = true;
+            totalTemp += payer.sommePayee
+        });
+        var conflictRestructured: Object = {};
+        if ((isReste && totalTemp != prixTotal) || (prixTotal < totalTemp)) {
+            conflictRestructured["payers"] = payers
+            conflictRestructured["prixTotal"] = prixTotal
+        }
+        return conflictRestructured
+    }
+
     async addPut(router: Router): Promise<void> {
         this.patchFixConflit(router);
     }
@@ -271,6 +320,7 @@ export default class ConflitController extends Controller {
         this.patchFixUstensiles(router);
         this.patchFixSalle(router);
         this.patchFixMateriels(router);
+        this.patchFixPayer(router);
     }
 
     private patchFixUstensiles(router: Router) {
@@ -330,6 +380,37 @@ export default class ConflitController extends Controller {
             }
         });
     }
+
+    private patchFixPayer(router: Router) {
+        router.patch("/payers/:idReservation", async (req: Request, res: Response, next: NextFunction) => {
+            try {
+                try {
+                    await getConnection().getRepository(Reservation).findOneOrFail(req.params.idReservation)
+                } catch (error) {
+                    this.sendResponse(res, 404, { message: "Reservation not found" })
+                }
+                var changes: Object = JSON.parse(req.body.changes);
+                var deleteQuery: string = `DELETE FROM "Payer"
+                WHERE "Reservation_idReservation" = ${req.params.idReservation}`
+                var addQuery: string[] = []
+                Object.keys(changes).forEach((typePaiement) => {
+                    if (changes[typePaiement] > 0) {
+                        addQuery.push(`( ${req.params.idReservation}, '${typePaiement}', ${changes[typePaiement]})`)
+                    }
+                });
+
+                var query: string = `INSERT INTO "Payer"(
+                    "Reservation_idReservation", "Paiement_typePaiement", "sommePayee")
+                    VALUES ${addQuery.join(", ")}`;
+                await getConnection().createEntityManager().query(deleteQuery);
+                var ress = await getConnection().createEntityManager().query(query);
+                await this.sendResponse(res, 204, { message: "Conflict resolved" });
+            }
+            catch (error) {
+                this.passErrorToExpress(error, next);
+            }
+        });
+    }
     private patchFixSalle(router: Router) {
         router.patch("/salles", async (req: Request, res: Response, next: NextFunction) => {
             try {
@@ -351,6 +432,6 @@ export default class ConflitController extends Controller {
     async addDelete(router: Router): Promise<void> {
     }
 
- 
+
 
 }
