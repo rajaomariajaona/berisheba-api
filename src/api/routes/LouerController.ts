@@ -56,8 +56,11 @@ export default class LouerController extends Controller {
                     await this.sendResponse(res, 404, { message: "Reservation not found" })
                     return;
                 }
+
                 try {
                     var data: Object = JSON.parse(req.body.data)
+                    console.log(data);
+                    
                     var values: string[] = Object.keys(data).filter((key) => {
                         return data[key] > 0;
                     }).map((key) => {
@@ -65,7 +68,7 @@ export default class LouerController extends Controller {
                     })
                     if (values.length > 0) {
                         var query: string =
-                            `INSERT INTO "Louer" VALUES ${values.join(" , ")};`
+                            `INSERT INTO "Louer"("Reservation_idReservation", "Materiel_idMateriel", "nbLouee") VALUES ${values.join(" , ")};`
                         await getConnection().createEntityManager().query(query)
                     }
                     await this.sendResponse(res, 201, { message: "Materiel added to reservation" })

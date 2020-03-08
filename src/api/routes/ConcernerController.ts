@@ -59,7 +59,7 @@ export default class ConcernerController extends Controller {
                 }
                 try {
                     var query: string =
-                        `INSERT INTO "Concerner" VALUES (${idReservation},${idSalle}) ;`
+                        `INSERT INTO "Concerner"("reservationIdReservation", "salleIdSalle") VALUES (${idReservation},${idSalle}) ;`
                     await getConnection().createEntityManager().query(query)
                     await this.sendResponse(res, 201, { message: "Salle added to reservation"})
                 } catch (error) {
