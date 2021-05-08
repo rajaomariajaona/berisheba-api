@@ -28,7 +28,7 @@
       "reflect-metadata": "^0.1.10",
       "socket.io": "^2.3.0",
       "sqlite3": "^4.1.1",
-      "typeorm": "0.2.21",
+      "typeorm": "0.2.25",
       "ws": "^7.2.1",
       "xoauth2": "^1.2.0",
       "ts-node": "^8.6.2",
